@@ -6,17 +6,11 @@
   <title>🎯 GongGu 港股AI預測系統</title>
   <meta name="description" content="GongGu - AI-powered Hong Kong stock prediction system">
   
-  <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #0d1117; color: #fff; min-height: 100vh; }
-    header { background: #161b22; padding: 20px; border-bottom: 1px solid #30363d; display: flex; justify-content: space-between; align-items: center; }
+    header { background: #161b22; padding: 20px; border-bottom: 1px solid #30363d; }
     .logo { font-size: 1.8rem; font-weight: 800; background: linear-gradient(135deg, #3fb950, #58a6ff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-    .header-actions { display: flex; gap: 10px; }
-    .btn { padding: 8px 16px; border-radius: 6px; border: 1px solid #30363d; background: #21262d; color: #fff; cursor: pointer; font-size: 0.9rem; }
-    .btn:hover { background: #30363d; }
-    .btn-refresh { background: #238636; border-color: #238636; }
-    .btn-refresh:hover { background: #2ea043; }
     .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
     .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
     .stat-card { background: #161b22; border: 1px solid #30363d; border-radius: 12px; padding: 20px; text-align: center; }
@@ -27,46 +21,27 @@
     .tabs { display: flex; gap: 8px; margin-bottom: 20px; }
     .tab { padding: 10px 20px; border-radius: 8px; border: 1px solid #30363d; background: #161b22; color: #8b949e; cursor: pointer; }
     .tab.active { background: #3fb950; color: #000; border-color: #3fb950; }
-    .stock-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
-    .stock-card { background: #161b22; border: 1px solid #30363d; border-radius: 12px; padding: 16px; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; }
-    .stock-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
+    .stock-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px; }
+    .stock-card { background: #161b22; border: 1px solid #30363d; border-radius: 12px; padding: 16px; }
     .stock-card.buy { border-left: 4px solid #3fb950; }
     .stock-card.sell { border-left: 4px solid #f85149; }
     .stock-card.hold { border-left: 4px solid #8b949e; }
-    .stock-header { display: flex; justify-content: space-between; align-items: flex-start; }
     .stock-symbol { font-size: 1.3rem; font-weight: 700; }
-    .stock-name { color: #8b949e; font-size: 0.85rem; margin-top: 2px; }
-    .stock-signal { padding: 4px 12px; border-radius: 6px; font-weight: 600; font-size: 0.75rem; }
+    .stock-name { color: #8b949e; font-size: 0.85rem; }
+    .stock-signal { padding: 4px 12px; border-radius: 6px; font-weight: 600; font-size: 0.85rem; display: inline-block; margin-top: 8px; }
     .stock-signal.buy { background: #3fb950; color: #000; }
     .stock-signal.sell { background: #f85149; color: #fff; }
     .stock-signal.hold { background: #30363d; color: #8b949e; }
-    .stock-price { font-size: 1.5rem; font-weight: 600; margin: 12px 0 8px; }
-    .positive { color: #3fb950; }
-    .negative { color: #f85149; }
+    .stock-price { font-size: 1.5rem; font-weight: 600; margin: 8px 0; }
     .indicators { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
     .indicator { background: #21262d; padding: 4px 10px; border-radius: 4px; font-size: 0.75rem; color: #8b949e; }
     .loading { text-align: center; padding: 60px; color: #8b949e; }
     footer { text-align: center; padding: 40px; color: #8b949e; border-top: 1px solid #30363d; margin-top: 40px; }
-
-    /* Chart Modal */
-    .modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.8); z-index: 1000; }
-    .modal-overlay.active { display: flex; align-items: center; justify-content: center; }
-    .modal { background: #161b22; border-radius: 12px; width: 90%; max-width: 1000px; max-height: 90vh; overflow: hidden; }
-    .modal-header { padding: 16px 20px; border-bottom: 1px solid #30363d; display: flex; justify-content: space-between; align-items: center; }
-    .modal-title { font-size: 1.2rem; font-weight: 600; }
-    .modal-close { background: none; border: none; color: #8b949e; font-size: 1.5rem; cursor: pointer; padding: 4px 8px; }
-    .modal-close:hover { color: #fff; }
-    .modal-body { padding: 0; }
-    #chartContainer { width: 100%; height: 500px; }
-    .chart-loading { text-align: center; padding: 60px; color: #8b949e; }
   </style>
 </head>
 <body>
   <header>
     <div class="logo">🎯 GongGu</div>
-    <div class="header-actions">
-      <button class="btn btn-refresh" onclick="refreshData()">🔄 更新數據</button>
-    </div>
   </header>
 
   <main class="container">
@@ -84,8 +59,8 @@
         <div class="stat-label">賣出信號</div>
       </div>
       <div class="stat-card">
-        <div class="stat-value" id="lastUpdate">-</div>
-        <div class="stat-label">最後更新</div>
+        <div class="stat-value" id="holdCount">-</div>
+        <div class="stat-label">觀望</div>
       </div>
     </div>
 
@@ -105,49 +80,16 @@
     <p>🚀 Powered by AI + Machine Learning</p>
   </footer>
 
-  <!-- Chart Modal -->
-  <div class="modal-overlay" id="chartModal">
-    <div class="modal">
-      <div class="modal-header">
-        <div class="modal-title" id="chartTitle">股票圖表</div>
-        <button class="modal-close" onclick="closeChart()">×</button>
-      </div>
-      <div class="modal-body">
-        <div id="chartContainer">
-          <div class="chart-loading">載入圖表...</div>
-        </div>
-      </div>
-    </div>
-  </div>
-
   <script>
-    // Use localhost for development, api.gonggu.app for production
     const API_URL = 'https://api.gonggu.app/api';
-const ML_API_URL = 'https://api.gonggu.app/api/ml-predictions';
-    
     let allStocks = [];
-    let chartWidget = null;
 
     async function loadData() {
       try {
         const response = await fetch(API_URL + '/stocks');
-        const mlResponse = await fetch(ML_API_URL);
-        const mlData = await mlResponse.json();
-        const mlPredictions = mlData.predictions || [];
-        
-        // Create ML prediction lookup
-        const mlMap = {};
-        mlPredictions.forEach(p => { mlMap[p.symbol] = p; });
-        
         const data = await response.json();
         
         allStocks = data.all_stocks || [];
-        
-        // Add ML predictions to stocks
-        allStocks = allStocks.map(s => {
-          const ml = mlMap[s.symbol] || {};
-          return { ...s, ml_prediction: ml.ml_prediction, ml_confidence: ml.ml_confidence };
-        });
         const buyStocks = allStocks.filter(s => s.signal === 'BUY');
         const sellStocks = allStocks.filter(s => s.signal === 'SELL');
         const holdStocks = allStocks.filter(s => s.signal === 'HOLD');
@@ -157,41 +99,12 @@ const ML_API_URL = 'https://api.gonggu.app/api/ml-predictions';
         document.getElementById('sellCount').textContent = sellStocks.length;
         document.getElementById('holdCount').textContent = holdStocks.length;
         
-        // Show last update time
-        const now = new Date();
-        document.getElementById('lastUpdate').textContent = now.toLocaleTimeString('zh-HK', { hour: '2-digit', minute: '2-digit' });
-        
         renderStocks(allStocks);
         
       } catch (error) {
         console.error('Error:', error);
         document.getElementById('stockList').innerHTML = '<div class="loading">載入失敗，請稍後再試</div>';
       }
-    }
-
-    async function refreshData() {
-      const btn = document.querySelector('.btn-refresh');
-      btn.disabled = true;
-      btn.textContent = '更新中...';
-      
-      try {
-        const response = await fetch(API_URL + '/fetch', { method: 'POST' });
-        const result = await response.json();
-        
-        if (result.success) {
-          await loadData();
-          btn.textContent = '✅ 更新成功';
-        } else {
-          btn.textContent = '❌ 更新失敗';
-        }
-      } catch (error) {
-        btn.textContent = '❌ 更新失敗';
-      }
-      
-      setTimeout(() => {
-        btn.disabled = false;
-        btn.textContent = '🔄 更新數據';
-      }, 2000);
     }
 
     function renderStocks(stocks) {
@@ -208,79 +121,21 @@ const ML_API_URL = 'https://api.gonggu.app/api/ml-predictions';
         const changeClass = change >= 0 ? 'positive' : 'negative';
         const changeSign = change >= 0 ? '+' : '';
         
-        return '<div class="stock-card ' + signalClass + '" onclick="showChart(\'' + stock.symbol + '\', \'' + stock.name + '\')">' +
-          '<div class="stock-header">' +
-            '<div>' +
-              '<div class="stock-symbol">' + stock.symbol + '</div>' +
-              '<div class="stock-name">' + stock.name + '</div>' +
-            '</div>' +
-            '<div class="stock-signal ' + signalClass + '">' + stock.signal + '</div>' +
-          '</div>' +
+        return '<div class="stock-card ' + signalClass + '">' +
+          '<div class="stock-symbol">' + stock.symbol + '</div>' +
+          '<div class="stock-name">' + stock.name + '</div>' +
           '<div class="stock-price">$' + stock.close + ' <span class="' + changeClass + '">' + changeSign + stock.change + '%</span></div>' +
+          '<div class="stock-signal ' + signalClass + '">' + stock.signal + '</div>' +
           '<div class="indicators">' +
             '<div class="indicator">RSI: ' + (stock.rsi14 || '-') + '</div>' +
+            '<div class="indicator">MACD: ' + (stock.macd || '-') + '</div>' +
             '<div class="indicator">MA20: $' + (stock.ma20 || '-') + '</div>' +
-            (stock.buyScore ? '<div class="indicator" style="background:' + (stock.buyScore > stock.sellScore ? '#238636' : '#da3633') + '">Score: ' + stock.buyScore + '/' + stock.sellScore + '</div>' : '') +
+            '<div class="indicator">Vol: ' + (stock.volumeRatio || '-') + 'x</div>' +
           '</div>' +
         '</div>';
       }).join('');
     }
 
-    function showChart(symbol, name) {
-      document.getElementById('chartModal').classList.add('active');
-      document.getElementById('chartTitle').textContent = symbol + ' ' + name + ' - 技術圖表';
-      
-      const container = document.getElementById('chartContainer');
-      container.innerHTML = '<div class="chart-loading">載入圖表...</div>';
-      
-      // Create TradingView chart
-      if (chartWidget) {
-        chartWidget.remove();
-      }
-      
-      chartWidget = new TradingView.widget({
-        width: container.clientWidth,
-        height: 500,
-        symbol: "HKEX:" + symbol,
-        interval: "D",
-        timezone: "Asia/Hong_Kong",
-        theme: "dark",
-        style: "1",
-        locale: "zh_HK",
-        toolbar_bg: "#0d1117",
-        enable_publishing: false,
-        hide_top_toolbar: false,
-        hide_legend: false,
-        save_image: false,
-        container_id: "chartContainer",
-        backgroundColor: "#0d1117",
-        gridColor: "#1e2228"
-      });
-      
-      // Resize chart on modal resize
-      setTimeout(() => {
-        if (chartWidget && chartWidget.chart) {
-          chartWidget.chart().resize(container.clientWidth, 500);
-        }
-      }, 1000);
-    }
-
-    function closeChart() {
-      document.getElementById('chartModal').classList.remove('active');
-      if (chartWidget) {
-        chartWidget.remove();
-        chartWidget = null;
-      }
-    }
-
-    // Close modal on overlay click
-    document.getElementById('chartModal').addEventListener('click', (e) => {
-      if (e.target.id === 'chartModal') {
-        closeChart();
-      }
-    });
-
-    // Tab filtering
     document.querySelectorAll('.tab').forEach(tab => {
       tab.addEventListener('click', () => {
         document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
@@ -295,9 +150,7 @@ const ML_API_URL = 'https://api.gonggu.app/api/ml-predictions';
       });
     });
 
-    // Auto-refresh every 5 minutes
     loadData();
-    setInterval(loadData, 5 * 60 * 1000);
   </script>
 </body>
 </html>
