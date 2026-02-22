@@ -122,9 +122,7 @@
 
   <script>
     // Use localhost for development, api.gonggu.app for production
-    const API_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
-      ? 'http://localhost:3000/api' 
-      : 'https://api.gonggu.app/api';
+    const API_URL = 'https://api.gonggu.app/api';
     
     let allStocks = [];
     let chartWidget = null;
@@ -138,12 +136,10 @@
         const buyStocks = allStocks.filter(s => s.signal === 'BUY');
         const sellStocks = allStocks.filter(s => s.signal === 'SELL');
         const holdStocks = allStocks.filter(s => s.signal === 'HOLD');
-        const mlBuyStocks = allStocks.filter(s => s.ml_prediction === 'BUY');
-        const mlSellStocks = allStocks.filter(s => s.ml_prediction === 'SELL');
         
         document.getElementById('totalStocks').textContent = data.total_stocks || 0;
-        document.getElementById('buyCount').textContent = buyStocks.length + ' (ML:' + mlBuyStocks.length + ')';
-        document.getElementById('sellCount').textContent = sellStocks.length + ' (ML:' + mlSellStocks.length + ')';
+        document.getElementById('buyCount').textContent = buyStocks.length;
+        document.getElementById('sellCount').textContent = sellStocks.length;
         document.getElementById('holdCount').textContent = holdStocks.length;
         
         // Show last update time
@@ -209,7 +205,7 @@
           '<div class="indicators">' +
             '<div class="indicator">RSI: ' + (stock.rsi14 || '-') + '</div>' +
             '<div class="indicator">MA20: $' + (stock.ma20 || '-') + '</div>' +
-            (stock.ml_prediction ? '<div class="indicator" style="background:' + (stock.ml_prediction === 'BUY' ? '#238636' : '#da3633') + '">🤖 ' + stock.ml_prediction + ' ' + Math.round(stock.ml_confidence || 0) + '%</div>' : '') +
+            (stock.buyScore ? '<div class="indicator" style="background:' + (stock.buyScore > stock.sellScore ? '#238636' : '#da3633') + '">Score: ' + stock.buyScore + '/' + stock.sellScore + '</div>' : '') +
           '</div>' +
         '</div>';
       }).join('');
