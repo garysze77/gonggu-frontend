@@ -123,6 +123,7 @@
   <script>
     // Use localhost for development, api.gonggu.app for production
     const API_URL = 'https://api.gonggu.app/api';
+const ML_API_URL = 'https://api.gonggu.app/api/ml-predictions';
     
     let allStocks = [];
     let chartWidget = null;
@@ -130,9 +131,23 @@
     async function loadData() {
       try {
         const response = await fetch(API_URL + '/stocks');
+        const mlResponse = await fetch(ML_API_URL);
+        const mlData = await mlResponse.json();
+        const mlPredictions = mlData.predictions || [];
+        
+        // Create ML prediction lookup
+        const mlMap = {};
+        mlPredictions.forEach(p => { mlMap[p.symbol] = p; });
+        
         const data = await response.json();
         
         allStocks = data.all_stocks || [];
+        
+        // Add ML predictions to stocks
+        allStocks = allStocks.map(s => {
+          const ml = mlMap[s.symbol] || {};
+          return { ...s, ml_prediction: ml.ml_prediction, ml_confidence: ml.ml_confidence };
+        });
         const buyStocks = allStocks.filter(s => s.signal === 'BUY');
         const sellStocks = allStocks.filter(s => s.signal === 'SELL');
         const holdStocks = allStocks.filter(s => s.signal === 'HOLD');
