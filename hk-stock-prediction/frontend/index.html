@@ -35,6 +35,7 @@
     .stock-price { font-size: 1.5rem; font-weight: 600; margin: 8px 0; }
     .indicators { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
     .indicator { background: #21262d; padding: 4px 10px; border-radius: 4px; font-size: 0.75rem; color: #8b949e; }
+    .indicator.ml-pred { color: #fff; font-weight: 600; }
     .loading { text-align: center; padding: 60px; color: #8b949e; }
     footer { text-align: center; padding: 40px; color: #8b949e; border-top: 1px solid #30363d; margin-top: 40px; }
   </style>
@@ -86,10 +87,26 @@
 
     async function loadData() {
       try {
-        const response = await fetch(API_URL + '/stocks');
-        const data = await response.json();
+        // Fetch both stocks and ML predictions
+        const [stocksRes, mlRes] = await Promise.all([
+          fetch(API_URL + '/stocks'),
+          fetch(API_URL + '/ml-predictions')
+        ]);
         
-        allStocks = data.all_stocks || [];
+        const data = await stocksRes.json();
+        const mlData = await mlRes.json();
+        const mlPredictions = mlData.predictions || [];
+        
+        // Create ML lookup
+        const mlMap = {};
+        mlPredictions.forEach(p => { mlMap[p.symbol] = p; });
+        
+        // Add ML predictions to stocks
+        allStocks = (data.all_stocks || []).map(s => ({
+          ...s,
+          ml_prediction: mlMap[s.symbol]?.ml_prediction || null,
+          ml_confidence: mlMap[s.symbol]?.ml_confidence || null
+        }));
         const buyStocks = allStocks.filter(s => s.signal === 'BUY');
         const sellStocks = allStocks.filter(s => s.signal === 'SELL');
         const holdStocks = allStocks.filter(s => s.signal === 'HOLD');
@@ -130,6 +147,7 @@
             '<div class="indicator">RSI: ' + (stock.rsi14 || '-') + '</div>' +
             '<div class="indicator">MACD: ' + (stock.macd || '-') + '</div>' +
             '<div class="indicator">MA20: $' + (stock.ma20 || '-') + '</div>' +
+            (stock.ml_prediction ? '<div class="indicator ml-pred" style="background:' + (stock.ml_prediction === 'BUY' ? '#238636' : '#da3633') + '">🤖 ' + stock.ml_prediction + ' ' + (stock.ml_confidence || 0).toFixed(0) + '%</div>' : '') +
             '<div class="indicator">Vol: ' + (stock.volumeRatio || '-') + 'x</div>' +
           '</div>' +
         '</div>';
