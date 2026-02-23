@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GongGu 港股預測系統</title>
+    <script src="https://unpkg.com/lightweight-charts@5.1.0/dist/lightweight-charts.standalone.production.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: #0d1117;
+            color: #e6edf3;
+            min-height: 100vh;
+        }
+
+        /* Nav Bar */
+        .navbar {
+            background: linear-gradient(180deg, #161b22 0%, #0d1117 100%);
+            padding: 16px 32px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid #30363d;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #58a6ff 0%, #1f6feb 100%);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+
+        .logo-text {
+            font-size: 24px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #58a6ff 0%, #79c0ff 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 24px;
+        }
+
+        .nav-links a {
+            color: #8b949e;
+            text-decoration: none;
+            font-size: 14px;
+            transition: color 0.2s;
+        }
+
+        .nav-links a:hover {
+            color: #58a6ff;
+        }
+
+        /* Search Section */
+        .search-section {
+            padding: 48px 32px;
+            text-align: center;
+            background: radial-gradient(ellipse at top, #161b22 0%, #0d1117 70%);
+        }
+
+        .search-title {
+            font-size: 32px;
+            margin-bottom: 24px;
+            color: #e6edf3;
+        }
+
+        .search-title span {
+            color: #58a6ff;
+        }
+
+        .search-container {
+            max-width: 600px;
+            margin: 0 auto;
+            position: relative;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 18px 24px;
+            padding-right: 120px;
+            font-size: 18px;
+            border: 2px solid #30363d;
+            border-radius: 12px;
+            background: #161b22;
+            color: #e6edf3;
+            outline: none;
+            transition: all 0.3s;
+        }
+
+        .search-input:focus {
+            border-color: #58a6ff;
+            box-shadow: 0 0 0 4px rgba(88, 166, 255, 0.15);
+        }
+
+        .search-input::placeholder {
+            color: #6e7681;
+        }
+
+        .search-btn {
+            position: absolute;
+            right: 8px;
+            top: 8px;
+            bottom: 8px;
+            padding: 0 24px;
+            background: linear-gradient(135deg, #58a6ff 0%, #1f6feb 100%);
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .search-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(88, 166, 255, 0.3);
+        }
+
+        /* Stock Info */
+        .stock-info {
+            display: none;
+            padding: 24px 32px;
+            background: #161b22;
+            border-bottom: 1px solid #30363d;
+        }
+
+        .stock-info.active {
+            display: block;
+        }
+
+        .stock-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .stock-name {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .stock-symbol {
+            font-size: 28px;
+            font-weight: 700;
+        }
+
+        .stock-company {
+            font-size: 18px;
+            color: #8b949e;
+        }
+
+        .stock-price {
+            text-align: right;
+        }
+
+        .price {
+            font-size: 32px;
+            font-weight: 700;
+        }
+
+        .price.up {
+            color: #3fb950;
+        }
+
+        .price.down {
+            color: #f85149;
+        }
+
+        .prediction {
+            display: flex;
+            gap: 24px;
+            margin-top: 8px;
+        }
+
+        .prediction-badge {
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .prediction-badge.buy {
+            background: rgba(63, 185, 80, 0.15);
+            color: #3fb950;
+            border: 1px solid rgba(63, 185, 80, 0.3);
+        }
+
+        .prediction-badge.sell {
+            background: rgba(248, 81, 73, 0.15);
+            color: #f85149;
+            border: 1px solid rgba(248, 81, 73, 0.3);
+        }
+
+        .confidence {
+            color: #8b949e;
+            font-size: 14px;
+        }
+
+        /* Chart Container */
+        .chart-section {
+            display: none;
+            padding: 24px 32px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .chart-section.active {
+            display: block;
+        }
+
+        .chart-container {
+            background: #161b22;
+            border-radius: 12px;
+            border: 1px solid #30363d;
+            padding: 16px;
+        }
+
+        #chart {
+            width: 100%;
+            height: 500px;
+        }
+
+        /* Loading */
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 48px;
+            color: #8b949e;
+        }
+
+        .loading.active {
+            display: block;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid #30363d;
+            border-top-color: #58a6ff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 16px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Error */
+        .error {
+            display: none;
+            text-align: center;
+            padding: 32px;
+            color: #f85149;
+            background: rgba(248, 81, 73, 0.1);
+            border-radius: 12px;
+            margin: 24px 32px;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .error.active {
+            display: block;
+        }
+
+        /* Quick Search Buttons */
+        .quick-search {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            margin-top: 24px;
+            flex-wrap: wrap;
+        }
+
+        .quick-btn {
+            padding: 8px 16px;
+            background: #21262d;
+            border: 1px solid #30363d;
+            border-radius: 20px;
+            color: #8b949e;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .quick-btn:hover {
+            background: #30363d;
+            color: #58a6ff;
+            border-color: #58a6ff;
+        }
+    </style>
+</head>
+<body>
+    <!-- Nav Bar -->
+    <nav class="navbar">
+        <div class="logo">
+            <div class="logo-icon">📈</div>
+            <span class="logo-text">GongGu</span>
+        </div>
+        <div class="nav-links">
+            <a href="#">首頁</a>
+            <a href="#">排行榜</a>
+            <a href="#">關於</a>
+        </div>
+    </nav>
+
+    <!-- Search Section -->
+    <section class="search-section">
+        <h1 class="search-title">輸入股票編號，預測<span>未來走勢</span></h1>
+        <div class="search-container">
+            <input type="text" class="search-input" id="stockInput" placeholder="例如: 0700 (騰訊), 9988 (阿里巴巴)" />
+            <button class="search-btn" onclick="searchStock()">搜尋</button>
+        </div>
+        <div class="quick-search">
+            <button class="quick-btn" onclick="searchStock('0700')">0700 騰訊</button>
+            <button class="quick-btn" onclick="searchStock('9988')">9988 阿里巴巴</button>
+            <button class="quick-btn" onclick="searchStock('3690')">3690 美團</button>
+            <button class="quick-btn" onclick="searchStock('700')">700 騰訊</button>
+            <button class="quick-btn" onclick="searchStock('9618')">9618 京東</button>
+        </div>
+    </section>
+
+    <!-- Error Message -->
+    <div class="error" id="errorMsg"></div>
+
+    <!-- Loading -->
+    <div class="loading" id="loading">
+        <div class="spinner"></div>
+        <div>載入中...</div>
+    </div>
+
+    <!-- Stock Info -->
+    <section class="stock-info" id="stockInfo">
+        <div class="stock-header">
+            <div class="stock-name">
+                <span class="stock-symbol" id="stockSymbol">---</span>
+                <span class="stock-company" id="stockCompany">---</span>
+            </div>
+            <div class="stock-price">
+                <div class="price" id="stockPrice">---</div>
+                <div class="prediction">
+                    <span class="prediction-badge" id="predictionBadge">---</span>
+                    <span class="confidence" id="confidence">---</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Chart Section -->
+    <section class="chart-section" id="chartSection">
+        <div class="chart-container">
+            <div id="chart"></div>
+        </div>
+    </section>
+
+    <script>
+        // TradingView Lightweight Charts 5.1
+        const { createChart, CandlestickSeries, AreaSeries } = LightweightCharts;
+
+        let chart = null;
+        let candlestickSeries = null;
+        let volumeSeries = null;
+
+        // Initialize chart
+        function initChart() {
+            const chartContainer = document.getElementById('chart');
+            
+            chart = createChart(chartContainer, {
+                layout: {
+                    background: { type: 'solid', color: '#161b22' },
+                    textColor: '#8b949e',
+                },
+                grid: {
+                    vertLines: { color: '#30363d' },
+                    horzLines: { color: '#30363d' },
+                },
+                crosshair: {
+                    mode: LightweightCharts.CrosshairMode.Normal,
+                },
+                timeScale: {
+                    borderColor: '#30363d',
+                    timeVisible: true,
+                },
+                rightPriceScale: {
+                    borderColor: '#30363d',
+                },
+                width: chartContainer.clientWidth,
+                height: 500,
+            });
+
+            candlestickSeries = chart.addSeries(CandlestickSeries, {
+                upColor: '#3fb950',
+                downColor: '#f85149',
+                borderUpColor: '#3fb950',
+                borderDownColor: '#f85149',
+                wickUpColor: '#3fb950',
+                wickDownColor: '#f85149',
+            });
+
+            volumeSeries = chart.addSeries(AreaSeries, {
+                priceFormat: { type: 'volume' },
+                priceScaleId: 'volume',
+            });
+
+            chart.priceScale('volume').applyOptions({
+                scaleMargins: {
+                    top: 0.8,
+                    bottom: 0,
+                },
+            });
+
+            // Handle resize
+            window.addEventListener('resize', () => {
+                if (chart) {
+                    chart.applyOptions({
+                        width: chartContainer.clientWidth,
+                    });
+                }
+            });
+        }
+
+        // Generate sample candlestick data (for demo)
+        function generateSampleData(basePrice) {
+            const data = [];
+            let price = basePrice;
+            const now = new Date();
+            
+            for (let i = 365; i >= 0; i--) {
+                const date = new Date(now);
+                date.setDate(date.getDate() - i);
+                const time = date.toISOString().split('T')[0];
+                
+                const change = (Math.random() - 0.5) * basePrice * 0.05;
+                const open = price;
+                const close = price + change;
+                const high = Math.max(open, close) + Math.random() * basePrice * 0.02;
+                const low = Math.min(open, close) - Math.random() * basePrice * 0.02;
+                
+                data.push({
+                    time: time,
+                    open: parseFloat(open.toFixed(2)),
+                    high: parseFloat(high.toFixed(2)),
+                    low: parseFloat(low.toFixed(2)),
+                    close: parseFloat(close.toFixed(2)),
+                });
+                
+                price = close;
+            }
+            return data;
+        }
+
+        function generateVolumeData(data) {
+            return data.map(d => ({
+                time: d.time,
+                value: Math.floor(Math.random() * 10000000) + 1000000,
+            }));
+        }
+
+        // Search stock
+        async function searchStock(symbol) {
+            if (!symbol) {
+                symbol = document.getElementById('stockInput').value.trim();
+            }
+            
+            if (!symbol) {
+                showError('請輸入股票編號');
+                return;
+            }
+
+            // Show loading
+            document.getElementById('loading').classList.add('active');
+            document.getElementById('errorMsg').classList.remove('active');
+            document.getElementById('stockInfo').classList.remove('active');
+            document.getElementById('chartSection').classList.remove('active');
+
+            try {
+                // Call backend API
+                const response = await fetch(`http://172.104.99.225:3000/api/predict?symbol=${symbol}&api_key=gonggu-secret-key-2026`);
+                const result = await response.json();
+
+                if (result.error) {
+                    showError(result.error);
+                    return;
+                }
+
+                // Display stock info
+                document.getElementById('stockSymbol').textContent = result.symbol;
+                document.getElementById('stockCompany').textContent = result.name || result.symbol;
+                document.getElementById('stockPrice').textContent = `$${result.price}`;
+                
+                const predictionBadge = document.getElementById('predictionBadge');
+                if (result.ml_prediction === 'BUY') {
+                    predictionBadge.textContent = '📈 買入';
+                    predictionBadge.className = 'prediction-badge buy';
+                    document.getElementById('stockPrice').className = 'price up';
+                } else {
+                    predictionBadge.textContent = '📉 賣出';
+                    predictionBadge.className = 'prediction-badge sell';
+                    document.getElementById('stockPrice').className = 'price down';
+                }
+                
+                document.getElementById('confidence').textContent = `信心度: ${result.ml_confidence}%`;
+
+                document.getElementById('stockInfo').classList.add('active');
+
+                // Show chart
+                if (!chart) {
+                    initChart();
+                }
+
+                // Generate sample data with the predicted price as base
+                const candlestickData = generateSampleData(result.price);
+                const volumeData = generateVolumeData(candlestickData);
+
+                candlestickSeries.setData(candlestickData);
+                volumeSeries.setData(volumeData);
+
+                chart.timeScale().fitContent();
+
+                document.getElementById('chartSection').classList.add('active');
+
+            } catch (error) {
+                showError('無法連接服務器: ' + error.message);
+            } finally {
+                document.getElementById('loading').classList.remove('active');
+            }
+        }
+
+        function showError(msg) {
+            document.getElementById('loading').classList.remove('active');
+            document.getElementById('errorMsg').textContent = msg;
+            document.getElementById('errorMsg').classList.add('active');
+        }
+
+        // Handle Enter key
+        document.getElementById('stockInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                searchStock();
+            }
+        });
+
+        // Initialize on load
+        window.addEventListener('load', () => {
+            initChart();
+        });
+    </script>
+</body>
+</html>
