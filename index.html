@@ -97,15 +97,17 @@
         const mlData = await mlRes.json();
         const mlPredictions = mlData.predictions || [];
         
-        // Create ML lookup
+        // Create ML lookup (normalize symbols - remove leading zeros)
         const mlMap = {};
-        mlPredictions.forEach(p => { mlMap[p.symbol] = p; });
+        mlPredictions.forEach(p => { 
+          mlMap[p.symbol.replace(/^0+/, '')] = p; 
+        });
         
-        // Add ML predictions to stocks
+        // Add ML predictions to stocks (normalize symbol to match)
         allStocks = (data.all_stocks || []).map(s => ({
           ...s,
-          ml_prediction: mlMap[s.symbol]?.ml_prediction || null,
-          ml_confidence: mlMap[s.symbol]?.ml_confidence || null
+          ml_prediction: mlMap[s.symbol.replace(/^0+/, '')]?.ml_prediction || null,
+          ml_confidence: mlMap[s.symbol.replace(/^0+/, '')]?.ml_confidence || null
         }));
         const buyStocks = allStocks.filter(s => s.signal === 'BUY');
         const sellStocks = allStocks.filter(s => s.signal === 'SELL');
