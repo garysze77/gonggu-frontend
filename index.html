@@ -536,9 +536,29 @@
                     initChart();
                 }
 
-                // Generate sample data with the predicted price as base
-                const candlestickData = generateSampleData(result.price);
-                const volumeData = generateVolumeData(candlestickData);
+                // Get real chart data from backend
+                const chartResponse = await fetch(`https://api.gonggu.app/api/chart?symbol=${symbol}&resolution=D`);
+                const chartResult = await chartResponse.json();
+                
+                if (chartResult.error) {
+                    showError(chartResult.error);
+                    return;
+                }
+                
+                // Use real data from EJFQ
+                const candlestickData = chartResult.data.map(d => ({
+                    time: d.time,
+                    open: d.open,
+                    high: d.high,
+                    low: d.low,
+                    close: d.close
+                }));
+                
+                const volumeData = chartResult.data.map(d => ({
+                    time: d.time,
+                    value: d.volume || 0,
+                    color: d.close >= d.open ? 'rgba(63, 185, 80, 0.5)' : 'rgba(248, 81, 73, 0.5)'
+                }));
 
                 candlestickSeries.setData(candlestickData);
                 volumeSeries.setData(volumeData);
