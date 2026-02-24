@@ -880,7 +880,11 @@
                 document.getElementById('infoChange').className = 'info-value ' + (parseFloat(stockData.change) > 0 ? 'up' : 'down');
                 document.getElementById('infoVolume').textContent = formatNumber(stockData.volume);
                 document.getElementById('infoVolumeRatio').textContent = parseFloat(stockData.volumeRatio || 0).toFixed(2);
-                document.getElementById('infoDate').textContent = stockData.date || 'N/A';
+                // Get today's date from chart data
+                const latestTimestamp = candlestickData[candlestickData.length - 1].time;
+                const today = new Date(latestTimestamp * 1000).toLocaleDateString('zh-HK', { year: 'numeric', month: '2-digit', day: '2-digit' });
+                
+                document.getElementById('infoDate').textContent = today;
                 document.getElementById('infoSignal').textContent = stockData.signal || 'N/A';
                 document.getElementById('infoSignal').className = 'info-value ' + (stockData.signal === 'BUY' ? 'up' : stockData.signal === 'SELL' ? 'down' : 'neutral');
                 document.getElementById('basicInfo').classList.add('active');
