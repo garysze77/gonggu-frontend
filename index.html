@@ -919,9 +919,10 @@
                 document.getElementById('sellScore').textContent = (stockData.sellScore !== undefined && stockData.sellScore !== null) ? stockData.sellScore : 'N/A';
                 document.getElementById('indicatorsSection').classList.add('active');
 
-                // Get ML Price Prediction
+                // Get ML Price Prediction - try both with and without leading zero
+                const symbolForPred = normalizedSymbol.padStart(4, '0');
                 try {
-                    const pricePredResponse = await fetch(`https://api.gonggu.app/api/price-prediction/${normalizedSymbol}`);
+                    const pricePredResponse = await fetch(`https://api.gonggu.app/api/price-prediction/${symbolForPred}`);
                     const pricePred = await pricePredResponse.json();
                     
                     if (!pricePred.error) {
