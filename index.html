@@ -365,11 +365,10 @@
             hideAllSections();
             try {
                 const normalizedSymbol = symbol.replace(/^0+/, '') || symbol;
-                const response = await fetch(`https://api.gonggu.app/api/signals?symbol=${normalizedSymbol}`);
-                const result = await response.json();
-                if (result.error) { showError(result.error); return; }
-                let stockData = result.signals ? result.signals.find(s => s.symbol === symbol || s.symbol === normalizedSymbol || s.symbol === symbol.padStart(4,'0') || s.symbol === normalizedSymbol.padStart(4,'0')) : null;
-                if (!stockData) { stockData = { name: 'Stock ' + normalizedSymbol, signal: 'N/A', rsi14: 'N/A' }; }
+                // Use /api/stock/:symbol - supports ANY stock via EJFQ!
+                const response = await fetch(`https://api.gonggu.app/api/stock/${normalizedSymbol}`);
+                const stockData = await response.json();
+                if (stockData.error) { showError(stockData.error); return; }
                 if (!chart) initChart();
                 const chartResponse = await fetch(`https://api.gonggu.app/api/chart?symbol=${normalizedSymbol}&resolution=1`);
                 const chartResult = await chartResponse.json();
