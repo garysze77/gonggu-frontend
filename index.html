@@ -403,6 +403,7 @@
 
         .info-value.up { color: #3fb950; }
         .info-value.down { color: #f85149; }
+        .info-value.neutral { color: #8b949e; }
 
         /* Mobile Responsive */
         @media (max-width: 600px) {
@@ -522,6 +523,14 @@
         <div class="info-row">
             <span class="info-label">成交量比率</span>
             <span class="info-value" id="infoVolumeRatio">---</span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">交易日</span>
+            <span class="info-value" id="infoDate">---</span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">信號</span>
+            <span class="info-value" id="infoSignal">---</span>
         </div>
     </section>
 
@@ -827,10 +836,13 @@
                 document.getElementById('infoSymbol').textContent = stockData.symbol;
                 document.getElementById('infoName').textContent = stockData.name || 'N/A';
                 document.getElementById('infoPrice').textContent = '$' + latestCandle.close;
-                document.getElementById('infoChange').textContent = (stockData.change > 0 ? '+' : '') + stockData.change + '%';
-                document.getElementById('infoChange').className = 'info-value ' + (stockData.change > 0 ? 'up' : 'down');
+                document.getElementById('infoChange').textContent = (stockData.change > 0 ? '+' : '') + parseFloat(stockData.change).toFixed(2) + '%';
+                document.getElementById('infoChange').className = 'info-value ' + (parseFloat(stockData.change) > 0 ? 'up' : 'down');
                 document.getElementById('infoVolume').textContent = formatNumber(stockData.volume);
                 document.getElementById('infoVolumeRatio').textContent = parseFloat(stockData.volumeRatio || 0).toFixed(2);
+                document.getElementById('infoDate').textContent = stockData.date || 'N/A';
+                document.getElementById('infoSignal').textContent = stockData.signal || 'N/A';
+                document.getElementById('infoSignal').className = 'info-value ' + (stockData.signal === 'BUY' ? 'up' : stockData.signal === 'SELL' ? 'down' : 'neutral');
                 document.getElementById('basicInfo').classList.add('active');
 
                 // Populate Technical Indicators
