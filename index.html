@@ -502,32 +502,44 @@
             document.getElementById('chartSection').classList.remove('active');
 
             try {
-                // Call backend API
-                const response = await fetch(`https://api.gonggu.app/api/predict?symbol=${symbol}&api_key=gonggu-secret-key-2026`);
+                // Call backend API - use /api/signals
+                const response = await fetch(`https://api.gonggu.app/api/signals?symbol=${symbol}`);
                 const result = await response.json();
 
                 if (result.error) {
                     showError(result.error);
                     return;
                 }
-
+                
+                // Find the stock in signals array
+                const stockData = result.signals && result.signals.find(s => s.symbol === symbol || s.symbol === symbol.padStart(4, '0'));
+                
+                if (!stockData) {
+                    showError('找不到股票資料');
+                    return;
+                }
+                
                 // Display stock info
-                document.getElementById('stockSymbol').textContent = result.symbol;
-                document.getElementById('stockCompany').textContent = result.name || result.symbol;
-                document.getElementById('stockPrice').textContent = `$${result.price}`;
+                document.getElementById('stockSymbol').textContent = stockData.symbol;
+                document.getElementById('stockCompany').textContent = stockData.name || stockData.symbol;
+                document.getElementById('stockPrice').textContent = `$${stockData.close}`;
                 
                 const predictionBadge = document.getElementById('predictionBadge');
-                if (result.ml_prediction === 'BUY') {
+                if (stockData.signal === 'BUY') {
                     predictionBadge.textContent = '📈 買入';
                     predictionBadge.className = 'prediction-badge buy';
                     document.getElementById('stockPrice').className = 'price up';
-                } else {
+                } else if (stockData.signal === 'SELL') {
                     predictionBadge.textContent = '📉 賣出';
                     predictionBadge.className = 'prediction-badge sell';
                     document.getElementById('stockPrice').className = 'price down';
+                } else {
+                    predictionBadge.textContent = '⏸️ 持有';
+                    predictionBadge.className = 'prediction-badge';
+                    document.getElementById('stockPrice').className = 'price';
                 }
                 
-                document.getElementById('confidence').textContent = `信心度: ${result.ml_confidence}%`;
+                document.getElementById('confidence').textContent = `RSI: ${stockData.rsi14}`;
 
                 document.getElementById('stockInfo').classList.add('active');
 
