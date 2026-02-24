@@ -852,9 +852,9 @@
                 // Volume
                 document.getElementById('volumeSMA').textContent = formatNumber(stockData.volumeSMA);
                 
-                // Scores
-                document.getElementById('buyScore').textContent = stockData.buyScore || 'N/A';
-                document.getElementById('sellScore').textContent = stockData.sellScore || 'N/A';
+                // Scores - handle 0 properly
+                document.getElementById('buyScore').textContent = (stockData.buyScore !== undefined && stockData.buyScore !== null) ? stockData.buyScore : 'N/A';
+                document.getElementById('sellScore').textContent = (stockData.sellScore !== undefined && stockData.sellScore !== null) ? stockData.sellScore : 'N/A';
                 document.getElementById('indicatorsSection').classList.add('active');
 
                 candlestickSeries.setData(candlestickData);
