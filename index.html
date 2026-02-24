@@ -557,9 +557,9 @@
                     return;
                 }
                 
-                // Use real data from EJFQ
+                // Convert Unix timestamp to date string for TradingView
                 const candlestickData = chartResult.data.map(d => ({
-                    time: d.time,
+                    time: new Date(d.time * 1000).toISOString().split('T')[0],
                     open: d.open,
                     high: d.high,
                     low: d.low,
@@ -567,7 +567,7 @@
                 }));
                 
                 const volumeData = chartResult.data.map(d => ({
-                    time: d.time,
+                    time: new Date(d.time * 1000).toISOString().split('T')[0],
                     value: d.volume || 0,
                     color: d.close >= d.open ? 'rgba(63, 185, 80, 0.5)' : 'rgba(248, 81, 73, 0.5)'
                 }));
