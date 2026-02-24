@@ -798,10 +798,10 @@
                     return;
                 }
                 
-                // Convert Unix timestamp to TradingView format with Hong Kong timezone
-                // TradingView expects: Unix timestamp in seconds + timezone setting
+                // Convert Unix timestamp to TradingView format (seconds, not milliseconds)
+                // Handle both string and number timestamps
                 const candlestickData = chartResult.data.map(d => ({
-                    time: parseInt(d.time), // Unix timestamp in seconds (UTC)
+                    time: typeof d.time === 'string' ? parseInt(d.time) : d.time, // TradingView accepts Unix timestamp in seconds
                     open: parseFloat(d.open),
                     high: parseFloat(d.high),
                     low: parseFloat(d.low),
@@ -809,7 +809,7 @@
                 }));
                 
                 const volumeData = chartResult.data.map(d => ({
-                    time: parseInt(d.time),
+                    time: typeof d.time === 'string' ? parseInt(d.time) : d.time,
                     value: parseFloat(d.volume || 0),
                     color: d.close >= d.open ? 'rgba(63, 185, 80, 0.5)' : 'rgba(248, 81, 73, 0.5)'
                 }));
