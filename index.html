@@ -566,6 +566,13 @@
                 <div class="indicator-label">相對強弱指數</div>
             </div>
             
+            <!-- Trend -->
+            <div class="indicator-card">
+                <div class="indicator-title">趨勢</div>
+                <div class="indicator-value" id="trend">---</div>
+                <div class="indicator-label">價格相對均線</div>
+            </div>
+            
             <!-- Bollinger Bands -->
             <div class="indicator-card">
                 <div class="indicator-title">BB Upper</div>
@@ -855,6 +862,16 @@
                 const rsi = parseFloat(stockData.rsi14);
                 document.getElementById('rsi').textContent = rsi.toFixed(2);
                 document.getElementById('rsi').className = 'indicator-value ' + (rsi > 70 ? 'down' : rsi < 30 ? 'up' : 'neutral');
+                
+                // Trend - compare price with MAs
+                const price = latestCandle.close;
+                const ma5 = parseFloat(stockData.ma5);
+                const ma20 = parseFloat(stockData.ma20);
+                let trend = '震盪';
+                if (price > ma5 && price > ma20) trend = '上升';
+                else if (price < ma5 && price < ma20) trend = '下降';
+                document.getElementById('trend').textContent = trend;
+                document.getElementById('trend').className = 'indicator-value ' + (trend === '上升' ? 'up' : trend === '下降' ? 'down' : 'neutral');
                 
                 // Bollinger Bands
                 document.getElementById('bbUpper').textContent = stockData.bbUpper;
