@@ -245,7 +245,7 @@
 
         #chart {
             width: 100%;
-            height: 60vh;
+            height: 50vh;
             min-height: 400px;
         }
 
@@ -429,6 +429,10 @@
         // Initialize chart
         function initChart() {
             const chartContainer = document.getElementById('chart');
+            if (!chartContainer) return;
+            
+            const containerWidth = chartContainer.clientWidth || chartContainer.offsetWidth || window.innerWidth - 64;
+            const containerHeight = Math.max(400, window.innerHeight * 0.5);
             
             chart = createChart(chartContainer, {
                 layout: {
@@ -449,8 +453,8 @@
                 rightPriceScale: {
                     borderColor: '#30363d',
                 },
-                width: chartContainer.clientWidth,
-                height: 500,
+                width: containerWidth,
+                height: containerHeight,
             });
 
             candlestickSeries = chart.addSeries(CandlestickSeries, {
@@ -476,9 +480,10 @@
 
             // Handle resize
             window.addEventListener('resize', () => {
-                if (chart) {
+                if (chart && chartContainer) {
                     chart.applyOptions({
-                        width: chartContainer.clientWidth,
+                        width: chartContainer.clientWidth || window.innerWidth - 64,
+                        height: Math.max(400, window.innerHeight * 0.5)
                     });
                 }
             });
