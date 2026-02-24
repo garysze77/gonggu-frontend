@@ -830,7 +830,7 @@
                 document.getElementById('infoChange').textContent = (stockData.change > 0 ? '+' : '') + stockData.change + '%';
                 document.getElementById('infoChange').className = 'info-value ' + (stockData.change > 0 ? 'up' : 'down');
                 document.getElementById('infoVolume').textContent = formatNumber(stockData.volume);
-                document.getElementById('infoVolumeRatio').textContent = (stockData.volumeRatio || 0).toFixed(2);
+                document.getElementById('infoVolumeRatio').textContent = parseFloat(stockData.volumeRatio || 0).toFixed(2);
                 document.getElementById('basicInfo').classList.add('active');
 
                 // Populate Technical Indicators
