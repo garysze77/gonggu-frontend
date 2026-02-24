@@ -798,21 +798,29 @@
                     return;
                 }
                 
-                // Convert Unix timestamp to TradingView format (seconds, not milliseconds)
-                // Handle both string and number timestamps
-                const candlestickData = chartResult.data.map(d => ({
-                    time: typeof d.time === 'string' ? parseInt(d.time) : d.time, // TradingView accepts Unix timestamp in seconds
-                    open: parseFloat(d.open),
-                    high: parseFloat(d.high),
-                    low: parseFloat(d.low),
-                    close: parseFloat(d.close)
-                }));
+                // Convert Unix timestamp to Hong Kong time (UTC+8) for TradingView
+                const candlestickData = chartResult.data.map(d => {
+                    const timestamp = typeof d.time === 'string' ? parseInt(d.time) : d.time;
+                    // Add 8 hours (28800 seconds) to convert from UTC to Hong Kong time
+                    const hkTimestamp = timestamp + 28800;
+                    return {
+                        time: hkTimestamp,
+                        open: parseFloat(d.open),
+                        high: parseFloat(d.high),
+                        low: parseFloat(d.low),
+                        close: parseFloat(d.close)
+                    };
+                });
                 
-                const volumeData = chartResult.data.map(d => ({
-                    time: typeof d.time === 'string' ? parseInt(d.time) : d.time,
-                    value: parseFloat(d.volume || 0),
-                    color: d.close >= d.open ? 'rgba(63, 185, 80, 0.5)' : 'rgba(248, 81, 73, 0.5)'
-                }));
+                const volumeData = chartResult.data.map(d => {
+                    const timestamp = typeof d.time === 'string' ? parseInt(d.time) : d.time;
+                    const hkTimestamp = timestamp + 28800;
+                    return {
+                        time: hkTimestamp,
+                        value: parseFloat(d.volume || 0),
+                        color: d.close >= d.open ? 'rgba(63, 185, 80, 0.5)' : 'rgba(248, 81, 73, 0.5)'
+                    };
+                });
 
                 // NOW display stock info - get price from chart data (most recent)
                 const latestCandle = candlestickData[candlestickData.length - 1];
