@@ -572,7 +572,7 @@
                 }
 
                 // Get real chart data from backend (5-min intraday)
-                const chartResponse = await fetch(`https://api.gonggu.app/api/chart?symbol=${normalizedSymbol}&resolution=5`);
+                const chartResponse = await fetch(`https://api.gonggu.app/api/chart?symbol=${normalizedSymbol}&resolution=1`);
                 const chartResult = await chartResponse.json();
                 
                 console.log('Chart data received:', chartResult);
