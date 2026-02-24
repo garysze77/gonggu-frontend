@@ -929,7 +929,7 @@
                     const pricePredResponse = await fetch(`https://api.gonggu.app/api/price-prediction/${symbolForPred}`);
                     const pricePred = await pricePredResponse.json();
                     
-                    if (!pricePred.error) {
+                    if (!pricePred.error && pricePred.buy_target) {
                         document.getElementById('buyTarget').textContent = '$' + pricePred.buy_target;
                         document.getElementById('sellTarget').textContent = '$' + pricePred.sell_target;
                         
@@ -941,6 +941,12 @@
                         
                         document.getElementById('buyDiff').className = 'indicator-value ' + (buyDiffPct >= 0 ? 'up' : 'down');
                         document.getElementById('sellDiff').className = 'indicator-value ' + (sellDiffPct >= 0 ? 'up' : 'down');
+                    } else {
+                        // Index or not enough data - show message
+                        document.getElementById('buyTarget').textContent = 'N/A';
+                        document.getElementById('sellTarget').textContent = 'N/A';
+                        document.getElementById('buyDiff').textContent = '指數';
+                        document.getElementById('sellDiff').textContent = '不支持';
                     }
                 } catch (e) {
                     console.log('Price prediction error:', e);
