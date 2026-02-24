@@ -536,6 +536,31 @@
 
     <!-- Technical Indicators Section -->
     <section class="indicators-section" id="indicatorsSection">
+        <h3 style="color: #e6edf3; margin-bottom: 16px;">🎯 ML 價格預測</h3>
+        <div class="indicators-grid">
+            <div class="indicator-card">
+                <div class="indicator-title">買入目標</div>
+                <div class="indicator-value up" id="buyTarget">---</div>
+                <div class="indicator-label">建議買入價</div>
+            </div>
+            <div class="indicator-card">
+                <div class="indicator-title">賣出目標</div>
+                <div class="indicator-value down" id="sellTarget">---</div>
+                <div class="indicator-label">建議賣出價</div>
+            </div>
+            <div class="indicator-card">
+                <div class="indicator-title">買入價差</div>
+                <div class="indicator-value" id="buyDiff">---</div>
+                <div class="indicator-label">相對現價%</div>
+            </div>
+            <div class="indicator-card">
+                <div class="indicator-title">賣出價差</div>
+                <div class="indicator-value" id="sellDiff">---</div>
+                <div class="indicator-label">相對現價%</div>
+            </div>
+        </div>
+        
+        <h3 style="color: #e6edf3; margin: 24px 0 16px;">📊 技術指標</h3>
         <div class="indicators-grid">
             <!-- Moving Averages -->
             <div class="indicator-card">
@@ -893,6 +918,28 @@
                 document.getElementById('buyScore').textContent = (stockData.buyScore !== undefined && stockData.buyScore !== null) ? stockData.buyScore : 'N/A';
                 document.getElementById('sellScore').textContent = (stockData.sellScore !== undefined && stockData.sellScore !== null) ? stockData.sellScore : 'N/A';
                 document.getElementById('indicatorsSection').classList.add('active');
+
+                // Get ML Price Prediction
+                try {
+                    const pricePredResponse = await fetch(`https://api.gonggu.app/api/price-prediction/${normalizedSymbol}`);
+                    const pricePred = await pricePredResponse.json();
+                    
+                    if (!pricePred.error) {
+                        document.getElementById('buyTarget').textContent = '$' + pricePred.buy_target;
+                        document.getElementById('sellTarget').textContent = '$' + pricePred.sell_target;
+                        
+                        const buyDiffPct = pricePred.buy_target_pct;
+                        const sellDiffPct = pricePred.sell_target_pct;
+                        
+                        document.getElementById('buyDiff').textContent = (buyDiffPct > 0 ? '+' : '') + buyDiffPct.toFixed(2) + '%';
+                        document.getElementById('sellDiff').textContent = (sellDiffPct > 0 ? '+' : '') + sellDiffPct.toFixed(2) + '%';
+                        
+                        document.getElementById('buyDiff').className = 'indicator-value ' + (buyDiffPct >= 0 ? 'up' : 'down');
+                        document.getElementById('sellDiff').className = 'indicator-value ' + (sellDiffPct >= 0 ? 'up' : 'down');
+                    }
+                } catch (e) {
+                    console.log('Price prediction error:', e);
+                }
 
                 candlestickSeries.setData(candlestickData);
                 volumeSeries.setData(volumeData);
