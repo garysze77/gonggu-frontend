@@ -526,33 +526,8 @@
                     showError('找不到股票資料');
                     return;
                 }
-                
-                // Display stock info - get price from chart data (most recent)
-                const latestCandle = candlestickData[candlestickData.length - 1];
-                document.getElementById('stockSymbol').textContent = normalizedSymbol;
-                document.getElementById('stockCompany').textContent = stockData.name || stockData.symbol;
-                document.getElementById('stockPrice').textContent = `$${latestCandle.close}`;
-                
-                const predictionBadge = document.getElementById('predictionBadge');
-                if (stockData.signal === 'BUY') {
-                    predictionBadge.textContent = '📈 買入';
-                    predictionBadge.className = 'prediction-badge buy';
-                    document.getElementById('stockPrice').className = 'price up';
-                } else if (stockData.signal === 'SELL') {
-                    predictionBadge.textContent = '📉 賣出';
-                    predictionBadge.className = 'prediction-badge sell';
-                    document.getElementById('stockPrice').className = 'price down';
-                } else {
-                    predictionBadge.textContent = '⏸️ 持有';
-                    predictionBadge.className = 'prediction-badge';
-                    document.getElementById('stockPrice').className = 'price';
-                }
-                
-                document.getElementById('confidence').textContent = `RSI: ${stockData.rsi14} | 最新: $${latestCandle.close}`;
 
-                document.getElementById('stockInfo').classList.add('active');
-
-                // Show chart
+                // Show chart first to initialize
                 if (!chart) {
                     initChart();
                 }
@@ -587,6 +562,31 @@
                     value: parseFloat(d.volume || 0),
                     color: d.close >= d.open ? 'rgba(63, 185, 80, 0.5)' : 'rgba(248, 81, 73, 0.5)'
                 }));
+
+                // NOW display stock info - get price from chart data (most recent)
+                const latestCandle = candlestickData[candlestickData.length - 1];
+                document.getElementById('stockSymbol').textContent = normalizedSymbol;
+                document.getElementById('stockCompany').textContent = stockData.name || stockData.symbol;
+                document.getElementById('stockPrice').textContent = `$${latestCandle.close}`;
+                
+                const predictionBadge = document.getElementById('predictionBadge');
+                if (stockData.signal === 'BUY') {
+                    predictionBadge.textContent = '📈 買入';
+                    predictionBadge.className = 'prediction-badge buy';
+                    document.getElementById('stockPrice').className = 'price up';
+                } else if (stockData.signal === 'SELL') {
+                    predictionBadge.textContent = '📉 賣出';
+                    predictionBadge.className = 'prediction-badge sell';
+                    document.getElementById('stockPrice').className = 'price down';
+                } else {
+                    predictionBadge.textContent = '⏸️ 持有';
+                    predictionBadge.className = 'prediction-badge';
+                    document.getElementById('stockPrice').className = 'price';
+                }
+                
+                document.getElementById('confidence').textContent = `RSI: ${stockData.rsi14} | 最新: $${latestCandle.close}`;
+
+                document.getElementById('stockInfo').classList.add('active');
 
                 candlestickSeries.setData(candlestickData);
                 volumeSeries.setData(volumeData);
