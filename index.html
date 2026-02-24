@@ -527,10 +527,11 @@
                     return;
                 }
                 
-                // Display stock info
-                document.getElementById('stockSymbol').textContent = stockData.symbol;
+                // Display stock info - get price from chart data (most recent)
+                const latestCandle = candlestickData[candlestickData.length - 1];
+                document.getElementById('stockSymbol').textContent = normalizedSymbol;
                 document.getElementById('stockCompany').textContent = stockData.name || stockData.symbol;
-                document.getElementById('stockPrice').textContent = `$${stockData.close}`;
+                document.getElementById('stockPrice').textContent = `$${latestCandle.close}`;
                 
                 const predictionBadge = document.getElementById('predictionBadge');
                 if (stockData.signal === 'BUY') {
@@ -547,7 +548,7 @@
                     document.getElementById('stockPrice').className = 'price';
                 }
                 
-                document.getElementById('confidence').textContent = `RSI: ${stockData.rsi14}`;
+                document.getElementById('confidence').textContent = `RSI: ${stockData.rsi14} | 最新: $${latestCandle.close}`;
 
                 document.getElementById('stockInfo').classList.add('active');
 
