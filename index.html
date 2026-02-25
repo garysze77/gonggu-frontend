@@ -377,31 +377,30 @@
         let chartLines = {};
         
         function toggleChartLine(btn) {
-            btn.classList.toggle('active');
             const type = btn.dataset.chart;
+            const isActive = btn.classList.contains('active');
             
-            if (btn.classList.contains('active')) {
-                const data = window.chartData || [];
-                if (!data.length) return;
+            if (!isActive) {
+                // Turn ON
+                btn.classList.add('active');
+                if (!window.chartData || !window.chartData.length) return;
                 
-                let lineData, color;
-                if (type === 'ma5') lineData = data.filter(d => d.ma5).map(d => ({time: d.time, value: d.ma5}));
-                else if (type === 'ma10') lineData = data.filter(d => d.ma10).map(d => ({time: d.time, value: d.ma10}));
-                else if (type === 'ma20') lineData = data.filter(d => d.ma20).map(d => ({time: d.time, value: d.ma20}));
-                else if (type === 'bb') {
-                    // BB is shown as area, skip for now
-                    return;
+                let lineData = window.chartData.filter(d => d[type]);
+                if (!lineData.length) {
+                    lineData = window.chartData.filter(d => d.ma5 && type === 'ma5');
                 }
                 
-                if (lineData && lineData.length) {
+                if (lineData && lineData.length > 0) {
                     const series = chart.addLineSeries({
-                        color: type==='ma5'?'#22c55e':type==='ma10'?'#3b82f6':'#a855f7',
-                        lineWidth: 2, priceLineVisible: false
+                        color: type === 'ma5' ? '#22c55e' : type === 'ma10' ? '#3b82f6' : '#a855f7',
+                        lineWidth: 2
                     });
-                    series.setData(lineData);
+                    series.setData(lineData.map(d => ({ time: d.time, value: d[type] || d.ma5 })));
                     chartLines[type] = series;
                 }
             } else {
+                // Turn OFF
+                btn.classList.remove('active');
                 if (chartLines[type]) {
                     chart.removeSeries(chartLines[type]);
                     delete chartLines[type];
