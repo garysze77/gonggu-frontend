@@ -273,10 +273,24 @@
             </div>
         </div>
 
-        <div class="indicators-section" id="indicatorsSection">
+        
+        <!-- Indicator Toggle Buttons -->
+        <div class="toggle-section" style="margin: 24px 0;">
+            <div class="section-header" style="margin-bottom: 12px;">
+                <div class="section-title" style="font-size: 16px;">選擇顯示指標：</div>
+            </div>
+            <div class="toggle-buttons" style="display: flex; gap: 8px; flex-wrap: wrap;">
+                <button class="toggle-btn active" data-indicator="all" onclick="toggleIndicators('all')" style="padding: 10px 20px; background: var(--accent); color: white; border: none; border-radius: 8px; cursor: pointer;">全部顯示</button>
+                <button class="toggle-btn" data-indicator="ma" onclick="toggleIndicators('ma')" style="padding: 10px 20px; background: var(--bg-card); color: var(--text-secondary); border: 1px solid var(--border); border-radius: 8px; cursor: pointer;">MA 均線</button>
+                <button class="toggle-btn" data-indicator="bb" onclick="toggleIndicators('bb')" style="padding: 10px 20px; background: var(--bg-card); color: var(--text-secondary); border: 1px solid var(--border); border-radius: 8px; cursor: pointer;">Bollinger</button>
+                <button class="toggle-btn" data-indicator="macd" onclick="toggleIndicators('macd')" style="padding: 10px 20px; background: var(--bg-card); color: var(--text-secondary); border: 1px solid var(--border); border-radius: 8px; cursor: pointer;">MACD</button>
+                <button class="toggle-btn" data-indicator="volume" onclick="toggleIndicators('volume')" style="padding: 10px 20px; background: var(--bg-card); color: var(--text-secondary); border: 1px solid var(--border); border-radius: 8px; cursor: pointer;">成交量</button>
+            </div>
+        </div>
+<div class="indicators-section" id="indicatorsSection">
             <div class="section-header"><div class="section-icon green">📊</div><div class="section-title">技術指標</div><div class="section-subtitle">移動平均線 · RSI · 布林線</div></div>
             
-            <div style="margin-bottom: 24px;">
+            <div id="ma-group" style="margin-bottom: 24px;">
                 <h4 style="color: var(--text-secondary); font-size: 14px; margin-bottom: 12px; font-weight: 500;">移動平均線 MA</h4>
                 <div class="card-grid four-cols">
                     <div class="indicator-card"><div class="indicator-label">MA5</div><div class="indicator-value" id="ma5">---</div><div class="indicator-desc">5日均線</div></div>
@@ -305,7 +319,7 @@
                 </div>
             </div>
 
-            <div style="margin-top: 24px;">
+            <div id="kdj-group" style="margin-top: 24px;">
                 <h4 style="color: var(--text-secondary); font-size: 14px; margin-bottom: 12px; font-weight: 500;">KDJ 隨機指標</h4>
                 <div class="card-grid three-cols">
                     <div class="indicator-card"><div class="indicator-label">%K</div><div class="indicator-value" id="kdjK">---</div><div class="indicator-desc">快速</div></div>
@@ -314,7 +328,7 @@
                 </div>
             </div>
 
-            <div style="margin-top: 24px;">
+            <div id="wr-group" style="margin-top: 24px;">
                 <h4 style="color: var(--text-secondary); font-size: 14px; margin-bottom: 12px; font-weight: 500;">Williams %R & Stochastic</h4>
                 <div class="card-grid three-cols">
                     <div class="indicator-card"><div class="indicator-label">Williams %R</div><div class="indicator-value" id="williamsR">---</div><div class="indicator-desc">超買>-20 超賣<-80</div></div>
@@ -323,7 +337,7 @@
                 </div>
             </div>
 
-            <div style="margin-top: 24px;">
+            <div id="macd-group" style="margin-top: 24px;">
                 <h4 style="color: var(--text-secondary); font-size: 14px; margin-bottom: 12px; font-weight: 500;">MACD 指數平滑異同移動平均線</h4>
                 <div class="card-grid three-cols">
                     <div class="indicator-card"><div class="indicator-label">MACD</div><div class="indicator-value" id="macd">---</div><div class="indicator-desc">差離值</div></div>
@@ -490,7 +504,56 @@
             }
         }
 
-        document.getElementById('stockInput').addEventListener('keypress', function(e) {
+        
+
+        // Toggle indicators visibility
+        let maSeries = null, bbUpperSeries = null, bbLowerSeries = null, volumeSeries2 = null;
+        
+        function toggleIndicators(type) {
+            // Update button styles
+            document.querySelectorAll('.toggle-btn').forEach(btn => {
+                if (btn.dataset.indicator === type) {
+                    btn.style.background = 'var(--accent)';
+                    btn.style.color = 'white';
+                } else {
+                    btn.style.background = 'var(--bg-card)';
+                    btn.style.color = 'var(--text-secondary)';
+                }
+            });
+            
+            // Clear existing indicator series
+            if (maSeries) { chart.removeSeries(maSeries); maSeries = null; }
+            if (bbUpperSeries) { chart.removeSeries(bbUpperSeries); bbUpperSeries = null; }
+            if (bbLowerSeries) { chart.removeSeries(bbLowerSeries); bbLowerSeries = null; }
+            
+            // Get chart data
+            const chartData = window.chartData || [];
+            if (chartData.length === 0) return;
+            
+            if (type === 'all' || type === 'ma') {
+                // Add MA lines
+                const ma5Data = chartData.map(d => ({ time: d.time, value: d.ma5 }));
+                const ma10Data = chartData.map(d => ({ time: d.time, value: d.ma10 }));
+                const ma20Data = chartData.map(d => ({ time: d.time, value: d.ma20 }));
+                
+                maSeries = chart.addLineSeries({ color: '#22c55e', lineWidth: 1, priceLineVisible: false, title: 'MA5' });
+                maSeries.setData(ma5Data);
+            }
+            
+            if (type === 'all' || type === 'bb') {
+                // Add Bollinger Bands
+                const bbUpperData(d => ({ time = chartData.map: d.time, value: d.bbUpper }));
+                const bbLowerData = chartData.map(d => ({ time: d.time, value: d.bbLower }));
+                
+                bbUpperSeries = chart.addLineSeries({ color: 'rgba(99, 102, 241, 0.5)', lineWidth: 1, priceLineVisible: false, title: 'BB Upper' });
+                bbUpperSeries.setData(bbUpperData);
+                bbLowerSeries = chart.addLineSeries({ color: 'rgba(99, 102, 241, 0.5)', lineWidth: 1, priceLineVisible: false, title: 'BB Lower' });
+                bbLowerSeries.setData(bbLowerData);
+            }
+        }
+
+
+document.getElementById('stockInput').addEventListener('keypress', function(e) {
             if (e.key === 'Enter') searchStock();
         });
 
