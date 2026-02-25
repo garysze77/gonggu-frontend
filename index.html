@@ -230,12 +230,19 @@
         <div class="loading" id="loading"><div class="spinner"></div><div class="loading-text">正在分析股票數據...</div></div>
 
         
-        <div id="tgl" style="display:none;margin:15px auto;max-width:400px;text-align:center;background:#1a1a24;padding:12px;border-radius:8px;">
-<div style="color:#888;font-size:12px;margin-bottom:6px;">圖表顯示：</div>
-<button id="b5" onclick="tl('ma5')" style="margin:2px;padding:5px 10px;background:#22c55e;color:#fff;border:none;border-radius:4px;cursor:pointer;font-size:11px;">MA5</button>
-<button id="b10" onclick="tl('ma10')" style="margin:2px;padding:5px 10px;background:#222;color:#888;border:1px solid #333;border-radius:4px;cursor:pointer;font-size:11px;">MA10</button>
-<button id="b20" onclick="tl('ma20')" style="margin:2px;padding:5px 10px;background:#222;color:#888;border:1px solid #333;border-radius:4px;cursor:pointer;font-size:11px;">MA20</button>
-</div><div class="stock-header-card" id="stockHeaderCard">
+        
+        <!-- Toggle Section -->
+        <div id="toggle" style="display:none;margin:15px auto;max-width:500px;text-align:center;background:#1a1a24;padding:12px;border-radius:8px;">
+            <div style="color:#888;font-size:11px;margin-bottom:6px;">圖表線：</div>
+            <button id="b5" onclick="tl('ma5')" style="margin:2px;padding:5px 10px;background:#22c55e;color:#fff;border:none;border-radius:4px;cursor:pointer;font-size:11px;">MA5</button>
+            <button id="b10" onclick="tl('ma10')" style="margin:2px;padding:5px 10px;background:#222;color:#888;border:1px solid #333;border-radius:4px;cursor:pointer;font-size:11px;">MA10</button>
+            <button id="b20" onclick="tl('ma20')" style="margin:2px;padding:5px 10px;background:#222;color:#888;border:1px solid #333;border-radius:4px;cursor:pointer;font-size:11px;">MA20</button>
+            <div style="color:#888;font-size:11px;margin:10px 0 6px;">指標數值：</div>
+            <button id="gMA" onclick="tg('ma')" style="margin:2px;padding:5px 10px;background:#22c55e;color:#fff;border:none;border-radius:4px;cursor:pointer;font-size:11px;">MA</button>
+            <button id="gRSI" onclick="tg('rsi')" style="margin:2px;padding:5px 10px;background:#222;color:#888;border:1px solid #333;border-radius:4px;cursor:pointer;font-size:11px;">RSI</button>
+            <button id="gBB" onclick="tg('bb')" style="margin:2px;padding:5px 10px;background:#222;color:#888;border:1px solid #333;border-radius:4px;cursor:pointer;font-size:11px;">BB</button>
+        </div>
+<div class="stock-header-card" id="stockHeaderCard">
             <div class="stock-header-main">
                 <div class="stock-identity">
                     <div class="stock-symbol-badge" id="stockSymbol">---</div>
@@ -283,7 +290,7 @@
             <div class="section-header"><div class="section-icon green">📊</div><div class="section-title">技術指標</div><div class="section-subtitle">移動平均線 · RSI · 布林線</div></div>
             
             <div style="margin-bottom: 24px;">
-                <h4 style="color: var(--text-secondary); font-size: 14px; margin-bottom: 12px; font-weight: 500;">移動平均線 MA</h4>
+                <div id="ma-group"><h4 style="color: var(--text-secondary); font-size: 14px; margin-bottom: 12px; font-weight: 500;">移動平均線 MA</h4>
                 <div class="card-grid four-cols">
                     <div class="indicator-card"><div class="indicator-label">MA5</div><div class="indicator-value" id="ma5">---</div><div class="indicator-desc">5日均線</div></div>
                     <div class="indicator-card"><div class="indicator-label">MA10</div><div class="indicator-value" id="ma10">---</div><div class="indicator-desc">10日均線</div></div>
@@ -293,7 +300,7 @@
             </div>
             
             <div style="margin-bottom: 24px;">
-                <h4 style="color: var(--text-secondary); font-size: 14px; margin-bottom: 12px; font-weight: 500;">RSI 相對強弱指數</h4>
+                </div><div id="rsi-group"><h4 style="color: var(--text-secondary); font-size: 14px; margin-bottom: 12px; font-weight: 500;">RSI 相對強弱指數</h4>
                 <div class="card-grid four-cols">
                     <div class="indicator-card"><div class="indicator-label">RSI(14)</div><div class="indicator-value" id="rsi14">---</div><div class="indicator-desc">超過70超買，低於30超賣</div></div>
                     <div class="indicator-card"><div class="indicator-label">趨勢判斷</div><div class="indicator-value" id="trend">---</div><div class="indicator-desc">價格相對均線</div></div>
@@ -303,7 +310,7 @@
             </div>
             
             <div>
-                <h4 style="color: var(--text-secondary); font-size: 14px; margin-bottom: 12px; font-weight: 500;">布林線 Bollinger Bands</h4>
+                </div><div id="bb-group"><h4 style="color: var(--text-secondary); font-size: 14px; margin-bottom: 12px; font-weight: 500;">布林線 Bollinger Bands</h4>
                 <div class="card-grid three-cols">
                     <div class="indicator-card"><div class="indicator-label">BB Upper</div><div class="indicator-value" id="bbUpper">---</div><div class="indicator-desc">上軌線</div></div>
                     <div class="indicator-card"><div class="indicator-label">BB Middle</div><div class="indicator-value" id="bbMiddle">---</div><div class="indicator-desc">中軌線 (20日MA)</div></div>
@@ -322,7 +329,8 @@
         const { createChart, CandlestickSeries, AreaSeries, LineSeries } = LightweightCharts;
         var chart = null, candlestickSeries = null, volumeSeries = null; var ls = {};
 
-        function tl(t){var b=document.getElementById("b"+(t==="ma5"?"5":t==="ma10"?"10":"20"));if(ls[t]){chart.removeSeries(ls[t]);delete ls[t];b.style.background="#222";b.style.color="#888";b.style.border="1px solid #333"}else{var d=window.chartData;if(d){var ld=d.map(function(x){return{time:x.time,value:x[t]}}).filter(function(x){return x.value});if(ld.length){var s=chart.addSeries(LineSeries,{color:t==="ma5"?"#22c55e":t==="ma10"?"#3b82f6":"#a855f7",lineWidth:2});s.setData(ld);ls[t]=s;b.style.background=t==="ma5"?"#22c55e":t==="ma10"?"#3b82f6":"#a855f7";b.style.color="#fff";b.style.border="none"}}}}function initChart() {
+        function tg(g){var el=document.getElementById('g'+g.toUpperCase());document.querySelectorAll('#toggle button[id^="g"]').forEach(function(b){if(b.id!=='g'+g.toUpperCase()){b.style.background='#222';b.style.color='#888';b.style.border='1px solid #333'}});if(el.style.background==='#22c55e'){el.style.background='#222';el.style.color='#888';el.style.border='1px solid #333';showAllGroups()}else{el.style.background='#22c55e';el.style.color='#fff';el.style.border='none';showGroup(g)}}function showAllGroups(){var gs=['ma-group','rsi-group','bb-group'];gs.forEach(function(x){var e=document.getElementById(x);if(e)e.style.display='grid'})}function showGroup(g){showAllGroups();var hide={ma:['rsi-group','bb-group'],rsi:['ma-group','bb-group'],bb:['ma-group','rsi-group']};if(hide[g]){hide[g].forEach(function(x){var e=document.getElementById(x);if(e)e.style.display='none'})}}
+function tl(t){var b=document.getElementById("b"+(t==="ma5"?"5":t==="ma10"?"10":"20"));if(ls[t]){chart.removeSeries(ls[t]);delete ls[t];b.style.background="#222";b.style.color="#888";b.style.border="1px solid #333"}else{var d=window.chartData;if(d){var ld=d.map(function(x){return{time:x.time,value:x[t]}}).filter(function(x){return x.value});if(ld.length){var s=chart.addSeries(LineSeries,{color:t==="ma5"?"#22c55e":t==="ma10"?"#3b82f6":"#a855f7",lineWidth:2});s.setData(ld);ls[t]=s;b.style.background=t==="ma5"?"#22c55e":t==="ma10"?"#3b82f6":"#a855f7";b.style.color="#fff";b.style.border="none"}}}}function initChart() {
             const chartContainer = document.getElementById('chart');
             if (!chartContainer) return;
             const containerWidth = chartContainer.clientWidth || window.innerWidth - 64;
@@ -444,7 +452,7 @@
                 candlestickSeries.setData(candlestickData);
                 volumeSeries.setData(volumeData);
                 chart.timeScale().fitContent();
-                document.getElementById('chartSection').classList.add('active');document.getElementById('tgl').style.display='block';window.chartData=candlestickData;
+                document.getElementById('chartSection').classList.add('active');document.getElementById('toggle').style.display='block';window.chartData=candlestickData;
 
             } catch (error) {
                 showError('無法連接服務器: ' + error.message);
