@@ -538,9 +538,9 @@
                 document.getElementById('macdSignal').textContent = stockData.macdSignal||'N/A';
                 document.getElementById('macdHistogram').textContent = stockData.macdHistogram||'N/A';
                 
-                document.getElementById('indicatorsSection').classList.add('active');
+                
                 document.getElementById('toggleSection').style.display = 'block';
-                toggleChartIndicator('all');
+                
                 
                 candlestickSeries.setData(candlestickData);
                 volumeSeries.setData(volumeData);
