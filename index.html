@@ -194,7 +194,11 @@
             .card-grid.four-cols, .card-grid.three-cols, .card-grid.two-cols { grid-template-columns: 1fr; }
             #chart { height: 300px; min-height: 300px; }
         }
-    </style>
+    
+        .toggle-btn { padding: 8px 16px; background: var(--bg-card); border: 1px solid var(--border); border-radius: 8px; color: var(--text-secondary); font-size: 13px; cursor: pointer; transition: all 0.2s; }
+        .toggle-btn:hover { background: var(--bg-card-hover); border-color: var(--accent); }
+        .toggle-btn.active { background: var(--accent); border-color: var(--accent); color: white; }
+</style>
 </head>
 <body>
     <nav class="navbar">
@@ -274,7 +278,7 @@
         </div>
 
         
-        <!-- Indicator Toggle Buttons -->
+        <div id="toggleSection" style="display:none;">
         <div class="toggle-section" style="margin: 24px 0;">
             <div class="section-header" style="margin-bottom: 12px;">
                 <div class="section-title" style="font-size: 16px;">選擇顯示指標：</div>
@@ -288,6 +292,17 @@
             </div>
         </div>
 <div class="indicators-section" id="indicatorsSection">
+<div id="toggleSection" style="margin: 20px 0; padding: 16px; background: var(--bg-card); border-radius: 12px; border: 1px solid var(--border);">
+            <div style="margin-bottom: 12px; color: var(--text-secondary); font-size: 14px; font-weight: 500;">選擇顯示邊組指標：</div>
+            <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                <button class="toggle-btn active" data-indicator="all" onclick="toggleIndicators('all')">全部顯示</button>
+                <button class="toggle-btn" data-indicator="ma" onclick="toggleIndicators('ma')">MA 均線</button>
+                <button class="toggle-btn" data-indicator="bb" onclick="toggleIndicators('bb')">Bollinger</button>
+                <button class="toggle-btn" data-indicator="macd" onclick="toggleIndicators('macd')">MACD</button>
+                <button class="toggle-btn" data-indicator="kdj" onclick="toggleIndicators('kdj')">KDJ</button>
+                <button class="toggle-btn" data-indicator="wr" onclick="toggleIndicators('wr')">Williams %R</button>
+            </div>
+        </div>
             <div class="section-header"><div class="section-icon green">📊</div><div class="section-title">技術指標</div><div class="section-subtitle">移動平均線 · RSI · 布林線</div></div>
             
             <div id="ma-group" style="margin-bottom: 24px;">
@@ -346,6 +361,7 @@
                 </div>
             </div>
         </div>
+    </div>
 
         <div class="chart-section" id="chartSection">
             <div class="section-header"><div class="section-icon blue">📈</div><div class="section-title">走勢圖</div><div class="section-subtitle">K線圖 + 成交量</div></div>
@@ -491,6 +507,7 @@
                 document.getElementById('macdHistogram').textContent = stockData.macdHistogram||'N/A';
                 
                 document.getElementById('indicatorsSection').classList.add('active');
+                document.getElementById('toggleSection').style.display = 'block';
                 
                 candlestickSeries.setData(candlestickData);
                 volumeSeries.setData(volumeData);
