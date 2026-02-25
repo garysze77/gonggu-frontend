@@ -288,39 +288,6 @@
             </div>
         </div>
 
-        <div class="indicators-section" id="indicatorsSection">
-            <div class="section-header"><div class="section-icon green">📊</div><div class="section-title">技術指標</div><div class="section-subtitle">移動平均線 · RSI · 布林線</div></div>
-            
-            <div style="margin-bottom: 24px;">
-                <h4 style="color: var(--text-secondary); font-size: 14px; margin-bottom: 12px; font-weight: 500;">移動平均線 MA</h4>
-                <div class="card-grid four-cols">
-                    <div class="indicator-card"><div class="indicator-label">MA5</div><div class="indicator-value" id="ma5">---</div><div class="indicator-desc">5日均線</div></div>
-                    <div class="indicator-card"><div class="indicator-label">MA10</div><div class="indicator-value" id="ma10">---</div><div class="indicator-desc">10日均線</div></div>
-                    <div class="indicator-card"><div class="indicator-label">MA20</div><div class="indicator-value" id="ma20">---</div><div class="indicator-desc">20日均線</div></div>
-                    <div class="indicator-card"><div class="indicator-label">MA50</div><div class="indicator-value" id="ma50">---</div><div class="indicator-desc">50日均線</div></div>
-                </div>
-            </div>
-            
-            <div style="margin-bottom: 24px;">
-                <h4 style="color: var(--text-secondary); font-size: 14px; margin-bottom: 12px; font-weight: 500;">RSI 相對強弱指數</h4>
-                <div class="card-grid four-cols">
-                    <div class="indicator-card"><div class="indicator-label">RSI(14)</div><div class="indicator-value" id="rsi14">---</div><div class="indicator-desc">超過70超買，低於30超賣</div></div>
-                    <div class="indicator-card"><div class="indicator-label">趨勢判斷</div><div class="indicator-value" id="trend">---</div><div class="indicator-desc">價格相對均線</div></div>
-                    <div class="indicator-card"><div class="indicator-label">買入分數</div><div class="indicator-value up" id="buyScore">---</div><div class="indicator-desc">評分 1-5</div></div>
-                    <div class="indicator-card"><div class="indicator-label">賣出分數</div><div class="indicator-value down" id="sellScore">---</div><div class="indicator-desc">評分 1-5</div></div>
-                </div>
-            </div>
-            
-            <div>
-                <h4 style="color: var(--text-secondary); font-size: 14px; margin-bottom: 12px; font-weight: 500;">布林線 Bollinger Bands</h4>
-                <div class="card-grid three-cols">
-                    <div class="indicator-card"><div class="indicator-label">BB Upper</div><div class="indicator-value" id="bbUpper">---</div><div class="indicator-desc">上軌線</div></div>
-                    <div class="indicator-card"><div class="indicator-label">BB Middle</div><div class="indicator-value" id="bbMiddle">---</div><div class="indicator-desc">中軌線 (20日MA)</div></div>
-                    <div class="indicator-card"><div class="indicator-label">BB Lower</div><div class="indicator-value" id="bbLower">---</div><div class="indicator-desc">下軌線</div></div>
-                </div>
-            </div>
-        </div>
-
         <div class="chart-section" id="chartSection">
             <div class="section-header"><div class="section-icon blue">📈</div><div class="section-title">走勢圖</div><div class="section-subtitle">K線圖 + 成交量</div></div>
             <div class="chart-container"><div id="chart"></div></div>
@@ -381,25 +348,26 @@
             const isActive = btn.classList.contains('active');
             
             if (!isActive) {
-                // Turn ON
                 btn.classList.add('active');
-                if (!window.chartData || !window.chartData.length) return;
+                const data = window.chartData;
+                if (!data || !data.length) return;
                 
-                let lineData = window.chartData.filter(d => d[type]);
-                if (!lineData.length) {
-                    lineData = window.chartData.filter(d => d.ma5 && type === 'ma5');
-                }
+                let lineData;
+                if (type === 'ma5') lineData = data.map(d => ({time: d.time, value: d.ma5}));
+                else if (type === 'ma10') lineData = data.map(d => ({time: d.time, value: d.ma10}));
+                else if (type === 'ma20') lineData = data.map(d => ({time: d.time, value: d.ma20}));
+                else return;
                 
-                if (lineData && lineData.length > 0) {
+                if (lineData && lineData[0] && lineData[0].value) {
                     const series = chart.addLineSeries({
                         color: type === 'ma5' ? '#22c55e' : type === 'ma10' ? '#3b82f6' : '#a855f7',
-                        lineWidth: 2
+                        lineWidth: 2,
+                        priceLineVisible: false
                     });
-                    series.setData(lineData.map(d => ({ time: d.time, value: d[type] || d.ma5 })));
+                    series.setData(lineData);
                     chartLines[type] = series;
                 }
             } else {
-                // Turn OFF
                 btn.classList.remove('active');
                 if (chartLines[type]) {
                     chart.removeSeries(chartLines[type]);
@@ -483,7 +451,7 @@
                 document.getElementById('bbUpper').textContent = stockData.bbUpper||'N/A';
                 document.getElementById('bbMiddle').textContent = stockData.bbMiddle||'N/A';
                 document.getElementById('bbLower').textContent = stockData.bbLower||'N/A';
-                document.getElementById('indicatorsSection').classList.add('active');
+                
                 
                 candlestickSeries.setData(candlestickData);
                 volumeSeries.setData(volumeData);
