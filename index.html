@@ -319,10 +319,10 @@
     </div>
 
     <script>
-        const { createChart, CandlestickSeries, AreaSeries } = LightweightCharts;
+        const { createChart, CandlestickSeries, AreaSeries, LineSeries } = LightweightCharts;
         var chart = null, candlestickSeries = null, volumeSeries = null; var ls = {};
 
-        function tl(t){var b=document.getElementById("b"+(t==="ma5"?"5":t==="ma10"?"10":"20"));if(ls[t]){chart.removeSeries(ls[t]);delete ls[t];b.style.background="#222";b.style.color="#888";b.style.border="1px solid #333"}else{var d=window.chartData;if(d){var ld=d.map(function(x){return{time:x.time,value:x[t]}}).filter(function(x){return x.value});if(ld.length){var s=chart.addLineSeries({color:t==="ma5"?"#22c55e":t==="ma10"?"#3b82f6":"#a855f7",lineWidth:2});s.setData(ld);ls[t]=s;b.style.background=t==="ma5"?"#22c55e":t==="ma10"?"#3b82f6":"#a855f7";b.style.color="#fff";b.style.border="none"}}}}function initChart() {
+        function tl(t){var b=document.getElementById("b"+(t==="ma5"?"5":t==="ma10"?"10":"20"));if(ls[t]){chart.removeSeries(ls[t]);delete ls[t];b.style.background="#222";b.style.color="#888";b.style.border="1px solid #333"}else{var d=window.chartData;if(d){var ld=d.map(function(x){return{time:x.time,value:x[t]}}).filter(function(x){return x.value});if(ld.length){var s=chart.addSeries(LineSeries,{color:t==="ma5"?"#22c55e":t==="ma10"?"#3b82f6":"#a855f7",lineWidth:2});s.setData(ld);ls[t]=s;b.style.background=t==="ma5"?"#22c55e":t==="ma10"?"#3b82f6":"#a855f7";b.style.color="#fff";b.style.border="none"}}}}function initChart() {
             const chartContainer = document.getElementById('chart');
             if (!chartContainer) return;
             const containerWidth = chartContainer.clientWidth || window.innerWidth - 64;
