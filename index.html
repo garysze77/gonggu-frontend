@@ -195,10 +195,8 @@
             #chart { height: 300px; min-height: 300px; }
         }
     
-        .toggle-btn { padding: 8px 16px; background: var(--bg-card); border: 1px solid var(--border); border-radius: 8px; color: var(--text-secondary); font-size: 13px; cursor: pointer; transition: all 0.2s; }
-        .toggle-btn:hover { background: var(--bg-card-hover); border-color: var(--accent); }
-        .toggle-btn.active { background: var(--accent); border-color: var(--accent); color: white; }
-.toggle-btn{padding:8px 14px;background:var(--bg-card);border:1px solid var(--border);border-radius:6px;color:var(--text-secondary);font-size:12px;cursor:pointer}.toggle-btn.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+        .toggle-btn { padding: 8px 14px; background: var(--bg-card); border: 1px solid var(--border); border-radius: 6px; color: var(--text-secondary); font-size: 12px; cursor: pointer; }
+        .toggle-btn.active { background: var(--accent); color: white; border-color: var(--accent); }
 </style>
 </head>
 <body>
@@ -236,13 +234,23 @@
 
         
         <!-- Chart Toggle -->
-        <div id="toggleSection" style="display:none; margin: 20px 0; padding: 16px; background: var(--bg-card); border-radius: 12px;">
-            <div style="margin-bottom:12px;color:var(--text-secondary);font-size:14px;">圖表顯示：</div>
-            <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <div id="toggleSection" style="display:none; margin: 20px 0; padding: 16px; background: var(--bg-card); border-radius: 12px; border: 1px solid var(--border);">
+            <div style="margin-bottom: 12px; color: var(--text-secondary); font-size: 14px; font-weight: 500;">圖表顯示：</div>
+            <div style="display: flex; gap: 8px; flex-wrap: wrap;">
                 <button class="toggle-btn active" data-chart="ma5" onclick="toggleChartLine(this)">MA5</button>
                 <button class="toggle-btn" data-chart="ma10" onclick="toggleChartLine(this)">MA10</button>
                 <button class="toggle-btn" data-chart="ma20" onclick="toggleChartLine(this)">MA20</button>
+                <button class="toggle-btn" data-chart="bb" onclick="toggleChartLine(this)">Bollinger</button>
             </div>
+        </div>
+
+
+        <!-- Chart Toggle Buttons -->
+        <div id="toggleSection" style="display:none; margin: 20px auto; max-width: 600px; text-align:center;">
+            <div style="color:#a0a0b0;margin-bottom:10px;font-size:14px;">圖表顯示：</div>
+            <button id="btnMA5" onclick="toggleLine('ma5')" style="margin:4px;padding:8px 16px;background:#22c55e;color:#fff;border:none;border-radius:6px;cursor:pointer;">MA5</button>
+            <button id="btnMA10" onclick="toggleLine('ma10')" style="margin:4px;padding:8px 16px;background:#1a1a24;color:#a0a0b0;border:1px solid #2a2a3a;border-radius:6px;cursor:pointer;">MA10</button>
+            <button id="btnMA20" onclick="toggleLine('ma20')" style="margin:4px;padding:8px 16px;background:#1a1a24;color:#a0a0b0;border:1px solid #2a2a3a;border-radius:6px;cursor:pointer;">MA20</button>
         </div>
 
 <div class="stock-header-card" id="stockHeaderCard">
@@ -289,65 +297,6 @@
             </div>
         </div>
 
-        
-        <div id="ma-group" style="margin-bottom: 24px;">
-                <h4 style="color: var(--text-secondary); font-size: 14px; margin-bottom: 12px; font-weight: 500;">移動平均線 MA</h4>
-                <div class="card-grid four-cols">
-                    <div class="indicator-card"><div class="indicator-label">MA5</div><div class="indicator-value" id="ma5">---</div><div class="indicator-desc">5日均線</div></div>
-                    <div class="indicator-card"><div class="indicator-label">MA10</div><div class="indicator-value" id="ma10">---</div><div class="indicator-desc">10日均線</div></div>
-                    <div class="indicator-card"><div class="indicator-label">MA20</div><div class="indicator-value" id="ma20">---</div><div class="indicator-desc">20日均線</div></div>
-                    <div class="indicator-card"><div class="indicator-label">MA50</div><div class="indicator-value" id="ma50">---</div><div class="indicator-desc">50日均線</div></div>
-                </div>
-            </div>
-            
-            <div style="margin-bottom: 24px;">
-                <h4 style="color: var(--text-secondary); font-size: 14px; margin-bottom: 12px; font-weight: 500;">RSI 相對強弱指數</h4>
-                <div class="card-grid four-cols">
-                    <div class="indicator-card"><div class="indicator-label">RSI(14)</div><div class="indicator-value" id="rsi14">---</div><div class="indicator-desc">超過70超買，低於30超賣</div></div>
-                    <div class="indicator-card"><div class="indicator-label">趨勢判斷</div><div class="indicator-value" id="trend">---</div><div class="indicator-desc">價格相對均線</div></div>
-                    <div class="indicator-card"><div class="indicator-label">買入分數</div><div class="indicator-value up" id="buyScore">---</div><div class="indicator-desc">評分 1-5</div></div>
-                    <div class="indicator-card"><div class="indicator-label">賣出分數</div><div class="indicator-value down" id="sellScore">---</div><div class="indicator-desc">評分 1-5</div></div>
-                </div>
-            </div>
-            
-            <div>
-                <h4 style="color: var(--text-secondary); font-size: 14px; margin-bottom: 12px; font-weight: 500;">布林線 Bollinger Bands</h4>
-                <div class="card-grid three-cols">
-                    <div class="indicator-card"><div class="indicator-label">BB Upper</div><div class="indicator-value" id="bbUpper">---</div><div class="indicator-desc">上軌線</div></div>
-                    <div class="indicator-card"><div class="indicator-label">BB Middle</div><div class="indicator-value" id="bbMiddle">---</div><div class="indicator-desc">中軌線 (20日MA)</div></div>
-                    <div class="indicator-card"><div class="indicator-label">BB Lower</div><div class="indicator-value" id="bbLower">---</div><div class="indicator-desc">下軌線</div></div>
-                </div>
-            </div>
-
-            <div id="kdj-group" style="margin-top: 24px;">
-                <h4 style="color: var(--text-secondary); font-size: 14px; margin-bottom: 12px; font-weight: 500;">KDJ 隨機指標</h4>
-                <div class="card-grid three-cols">
-                    <div class="indicator-card"><div class="indicator-label">%K</div><div class="indicator-value" id="kdjK">---</div><div class="indicator-desc">快速</div></div>
-                    <div class="indicator-card"><div class="indicator-label">%D</div><div class="indicator-value" id="kdjD">---</div><div class="indicator-desc">慢速</div></div>
-                    <div class="indicator-card"><div class="indicator-label">%J</div><div class="indicator-value" id="kdjJ">---</div><div class="indicator-desc">敏感</div></div>
-                </div>
-            </div>
-
-            <div id="wr-group" style="margin-top: 24px;">
-                <h4 style="color: var(--text-secondary); font-size: 14px; margin-bottom: 12px; font-weight: 500;">Williams %R & Stochastic</h4>
-                <div class="card-grid three-cols">
-                    <div class="indicator-card"><div class="indicator-label">Williams %R</div><div class="indicator-value" id="williamsR">---</div><div class="indicator-desc">超買>-20 超賣<-80</div></div>
-                    <div class="indicator-card"><div class="indicator-label">Stochastic %K</div><div class="indicator-value" id="stochK">---</div><div class="indicator-desc">快速</div></div>
-                    <div class="indicator-card"><div class="indicator-label">Stochastic %D</div><div class="indicator-value" id="stochD">---</div><div class="indicator-desc">慢速</div></div>
-                </div>
-            </div>
-
-            <div id="macd-group" style="margin-top: 24px;">
-                <h4 style="color: var(--text-secondary); font-size: 14px; margin-bottom: 12px; font-weight: 500;">MACD 指數平滑異同移動平均線</h4>
-                <div class="card-grid three-cols">
-                    <div class="indicator-card"><div class="indicator-label">MACD</div><div class="indicator-value" id="macd">---</div><div class="indicator-desc">差離值</div></div>
-                    <div class="indicator-card"><div class="indicator-label">Signal</div><div class="indicator-value" id="macdSignal">---</div><div class="indicator-desc">訊號線</div></div>
-                    <div class="indicator-card"><div class="indicator-label">Histogram</div><div class="indicator-value" id="macdHistogram">---</div><div class="indicator-desc">柱狀圖</div></div>
-                </div>
-            </div>
-        </div>
-    </div>
-
         <div class="chart-section" id="chartSection">
             <div class="section-header"><div class="section-icon blue">📈</div><div class="section-title">走勢圖</div><div class="section-subtitle">K線圖 + 成交量</div></div>
             <div class="chart-container"><div id="chart"></div></div>
@@ -357,6 +306,36 @@
     <script>
         const { createChart, CandlestickSeries, AreaSeries } = LightweightCharts;
         let chart = null, candlestickSeries = null, volumeSeries = null;
+
+        
+        var chartLineSeries = {};
+        
+        function toggleLine(type) {
+            var btn = document.getElementById('btn' + type.toUpperCase());
+            if (chartLineSeries[type]) {
+                chart.removeSeries(chartLineSeries[type]);
+                delete chartLineSeries[type];
+                btn.style.background = '#1a1a24';
+                btn.style.color = '#a0a0b0';
+                btn.style.border = '1px solid #2a2a3a';
+            } else {
+                var data = window.chartData;
+                if (!data) return;
+                var lineData = data.map(function(d) { return {time: d.time, value: d[type]}; });
+                lineData = lineData.filter(function(d) { return d.value; });
+                if (lineData.length > 0) {
+                    var series = chart.addLineSeries({
+                        color: type === 'ma5' ? '#22c55e' : type === 'ma10' ? '#3b82f6' : '#a855f7',
+                        lineWidth: 2
+                    });
+                    series.setData(lineData);
+                    chartLineSeries[type] = series;
+                    btn.style.background = type === 'ma5' ? '#22c55e' : type === 'ma10' ? '#3b82f6' : '#a855f7';
+                    btn.style.color = '#fff';
+                    btn.style.border = 'none';
+                }
+            }
+        }
 
         function initChart() {
             const chartContainer = document.getElementById('chart');
@@ -401,56 +380,34 @@
         }
 
         
-
-        // Chart indicator line series
         let chartLines = {};
         
         function toggleChartLine(btn) {
             const type = btn.dataset.chart;
-            btn.classList.toggle('active');
             const isActive = btn.classList.contains('active');
             
-            if (isActive) {
-                // Add line to chart
-                const chartData = window.chartData || [];
-                if (chartData.length === 0) return;
+            if (!isActive) {
+                btn.classList.add('active');
+                const data = window.chartData;
+                if (!data || !data.length) return;
                 
-                let lineData, color, width;
+                let lineData;
+                if (type === 'ma5') lineData = data.map(d => ({time: d.time, value: d.ma5}));
+                else if (type === 'ma10') lineData = data.map(d => ({time: d.time, value: d.ma10}));
+                else if (type === 'ma20') lineData = data.map(d => ({time: d.time, value: d.ma20}));
+                else return;
                 
-                if (type === 'ma5') {
-                    lineData = chartData.filter(d => d.ma5).map(d => ({ time: d.time, value: d.ma5 }));
-                    color = '#22c55e';
-                    width = 2;
-                } else if (type === 'ma10') {
-                    lineData = chartData.filter(d => d.ma10).map(d => ({ time: d.time, value: d.ma10 }));
-                    color = '#3b82f6';
-                    width = 2;
-                } else if (type === 'ma20') {
-                    lineData = chartData.filter(d => d.ma20).map(d => ({ time: d.time, value: d.ma20 }));
-                    color = '#a855f7';
-                    width = 2;
-                } else if (type === 'bbUpper') {
-                    lineData = chartData.filter(d => d.bbUpper).map(d => ({ time: d.time, value: d.bbUpper }));
-                    color = 'rgba(249, 115, 22, 0.8)';
-                    width = 1;
-                } else if (type === 'bbLower') {
-                    lineData = chartData.filter(d => d.bbLower).map(d => ({ time: d.time, value: d.bbLower }));
-                    color = 'rgba(249, 115, 22, 0.8)';
-                    width = 1;
-                }
-                
-                if (lineData && lineData.length > 0) {
+                if (lineData && lineData[0] && lineData[0].value) {
                     const series = chart.addLineSeries({
-                        color: color,
-                        lineWidth: width,
-                        priceLineVisible: false,
-                        crosshairMarkerVisible: false
+                        color: type === 'ma5' ? '#22c55e' : type === 'ma10' ? '#3b82f6' : '#a855f7',
+                        lineWidth: 2,
+                        priceLineVisible: false
                     });
                     series.setData(lineData);
                     chartLines[type] = series;
                 }
             } else {
-                // Remove line from chart
+                btn.classList.remove('active');
                 if (chartLines[type]) {
                     chart.removeSeries(chartLines[type]);
                     delete chartLines[type];
@@ -458,7 +415,6 @@
             }
         }
 
-        let chartLines={};function toggleChartLine(b){const t=b.dataset.chart;if(b.classList.contains('active')){b.classList.remove('active');if(chartLines[t]){chart.removeSeries(chartLines[t]);delete chartLines[t]}}else{b.classList.add('active');const d=window.chartData;if(d&&d.length){let ld;if(t==='ma5')ld=d.map(x=>({time:x.time,value:x.ma5}));else if(t==='ma10')ld=d.map(x=>({time:x.time,value:x.ma10}));else if(t==='ma20')ld=d.map(x=>({time:x.time,value:x.ma20}));if(ld&&ld[0]&&ld[0].value){const s=chart.addLineSeries({color:t==='ma5'?'#22c55e':t==='ma10'?'#3b82f6':'#a855f7',lineWidth:2});s.setData(ld);chartLines[t]=s}}}}}
         async function searchStock(symbol) {
             if (!symbol) symbol = document.getElementById('stockInput').value.trim();
             if (!symbol) { showError('請輸入股票編號'); return; }
@@ -475,9 +431,8 @@
                 const chartResult = await chartResponse.json();
                 if (chartResult.error) { showError(chartResult.error); return; }
                 if (!chartResult.data || chartResult.data.length === 0) { showError('沒有圖表數據'); return; }
-                const candlestickData = chartResult.data.map(d => { const ts = typeof d.time==='string'?parseInt(d.time):d.time; return { time: ts+28800, open: parseFloat(d.open), high: parseFloat(d.high), low: parseFloat(d.low), close: parseFloat(d.close), ma5: d.ma5, ma10: d.ma10, ma20: d.ma20, ma50: d.ma50, bbUpper: d.bbUpper, bbMiddle: d.bbMiddle, bbLower: d.bbLower }; });
+                const candlestickData = chartResult.data.map(d => { const ts = typeof d.time==='string'?parseInt(d.time):d.time; return { time: ts+28800, open: parseFloat(d.open), high: parseFloat(d.high), low: parseFloat(d.low), close: parseFloat(d.close), ma5: d.ma5, ma10: d.ma10, ma20: d.ma20 }; });
                 const volumeData = chartResult.data.map(d => { const ts = typeof d.time==='string'?parseInt(d.time):d.time; return { time: ts+28800, value: parseFloat(d.volume||0), color: d.close>=d.open?'rgba(34,197,94,0.5)':'rgba(239,68,68,0.5)' }; });
-                chartDataWithIndicators = candlestickData;
                 const latestCandle = candlestickData[candlestickData.length-1];
                 const change = parseFloat(stockData.change||0);
                 
@@ -536,29 +491,11 @@
                 document.getElementById('bbMiddle').textContent = stockData.bbMiddle||'N/A';
                 document.getElementById('bbLower').textContent = stockData.bbLower||'N/A';
                 
-                // KDJ
-                document.getElementById('kdjK').textContent = stockData.kdjK||'N/A';
-                document.getElementById('kdjD').textContent = stockData.kdjD||'N/A';
-                document.getElementById('kdjJ').textContent = stockData.kdjJ||'N/A';
-                
-                // Williams %R & Stochastic
-                document.getElementById('williamsR').textContent = stockData.williamsR||'N/A';
-                document.getElementById('stochK').textContent = stockData.stochK||'N/A';
-                document.getElementById('stochD').textContent = stockData.stochD||'N/A';
-                
-                // MACD
-                document.getElementById('macd').textContent = stockData.macd||'N/A';
-                document.getElementById('macdSignal').textContent = stockData.macdSignal||'N/A';
-                document.getElementById('macdHistogram').textContent = stockData.macdHistogram||'N/A';
-                
-                document.getElementById('indicatorsSection').classList.add('active');
-                document.getElementById('toggleSection').style.display = 'block';
-                toggleChartIndicator('all');
                 
                 candlestickSeries.setData(candlestickData);
                 volumeSeries.setData(volumeData);
                 chart.timeScale().fitContent();
-                document.getElementById('chartSection').classList.add('active');document.getElementById('toggleSection').style.display='block';window.chartData=candlestickData;
+                document.getElementById('chartSection').classList.add('active'); document.getElementById('toggleSection').style.display = 'block'; window.chartData = candlestickData;
                 document.getElementById('toggleSection').style.display = 'block';
                 window.chartData = candlestickData;
 
@@ -569,80 +506,7 @@
             }
         }
 
-        
-
-        // Chart indicator series
-        let ma5Series = null, ma10Series = null, ma20Series = null, ma50Series = null;
-        let bbUpperSeries = null, bbLowerSeries = null;
-        let chartDataWithIndicators = [];
-        
-        function toggleChartIndicator(type) {
-            // Update button styles
-            document.querySelectorAll('.toggle-btn').forEach(btn => {
-                if (btn.dataset.chart === type) {
-                    btn.style.background = 'var(--accent)';
-                    btn.style.color = 'white';
-                btn.style.background = 'var(--bg-card)';
-                    } else {
-                    btn.style.color = 'var(--text-secondary)';
-                }
-            });
-            
-            // Remove existing indicator series
-            if (ma5Series) { chart.removeSeries(ma5Series); ma5Series = null; }
-            if (ma10Series) { chart.removeSeries(ma10Series); ma10Series = null; }
-            if (ma20Series) { chart.removeSeries(ma20Series); ma20Series = null; }
-            if (ma50Series) { chart.removeSeries(ma50Series); ma50Series = null; }
-            if (bbUpperSeries) { chart.removeSeries(bbUpperSeries); bbUpperSeries = null; }
-            if (bbLowerSeries) { chart.removeSeries(bbLowerSeries); bbLowerSeries = null; }
-            
-            if (chartDataWithIndicators.length === 0) return;
-            
-            // Add selected indicator lines
-            if (type === 'ma5' || type === 'all') {
-                ma5Series = chart.addLineSeries({ color: '#22c55e', lineWidth: 1, priceLineVisible: false });
-                ma5Series.setData(chartDataWithIndicators.map(d => ({ time: d.time, value: d.ma5 })).filter(d => d.value));
-            }
-            if (type === 'ma10' || type === 'all') {
-                ma10Series = chart.addLineSeries({ color: '#3b82f6', lineWidth: 1, priceLineVisible: false });
-                ma10Series.setData(chartDataWithIndicators.map(d => ({ time: d.time, value: d.ma10 })).filter(d => d.value));
-            }
-            if (type === 'ma20' || type === 'all') {
-                ma20Series = chart.addLineSeries({ color: '#a855f7', lineWidth: 1, priceLineVisible: false });
-                ma20Series.setData(chartDataWithIndicators.map(d => ({ time: d.time, value: d.ma20 })).filter(d => d.value));
-            }
-            if (type === 'ma50' || type === 'all') {
-                ma50Series = chart.addLineSeries({ color: '#f97316', lineWidth: 1, priceLineVisible: false });
-                ma50Series.setData(chartDataWithIndicators.map(d => ({ time: d.time, value: d.ma50 })).filter(d => d.value));
-            }
-            if (type === 'bb' || type === 'all') {
-                bbUpperSeries = chart.addLineSeries({ color: 'rgba(255, 215, 0, 0.6)', lineWidth: 1, priceLineVisible: false });
-                bbUpperSeries.setData(chartDataWithIndicators.map(d => ({ time: d.time, value: d.bbUpper })).filter(d => d.value));
-                bbLowerSeries = chart.addLineSeries({ color: 'rgba(255, 215, 0, 0.6)', lineWidth: 1, priceLineVisible: false });
-                bbLowerSeries.setData(chartDataWithIndicators.map(d => ({ time: d.time, value: d.bbLower })).filter(d => d.value));
-            }
-        }
-        
-        // Also keep the card toggle for values
-        function toggleIndicators(type) {
-            document.querySelectorAll('.toggle-btn').forEach(btn => {
-                if (btn.dataset.indicator === type) {
-                    btn.style.background = 'var(--accent)';
-                    btn.style.color = 'white';
-                } else {
-                    btn.style.background = 'var(--bg-card)';
-                    btn.style.color = 'var(--text-secondary)';
-                }
-            });
-            const groups = ['ma-group', 'bb-group', 'macd-group', 'kdj-group', 'wr-group'];
-            groups.forEach(g => {
-                const el = document.getElementById(g);
-                if (el) el.style.display = (type === 'all' || g.includes(type)) ? 'grid' : 'none';
-            });
-        }
-
-
-document.getElementById('stockInput').addEventListener('keypress', function(e) {
+        document.getElementById('stockInput').addEventListener('keypress', function(e) {
             if (e.key === 'Enter') searchStock();
         });
 
