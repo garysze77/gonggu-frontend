@@ -559,7 +559,7 @@
             
             if (type === 'all' || type === 'bb') {
                 // Add Bollinger Bands
-                const bbUpperData(d => ({ time = chartData.map: d.time, value: d.bbUpper }));
+                const bbUpperData = chartData.map(d => ({ time: d.time, value: d.bbUpper }));
                 const bbLowerData = chartData.map(d => ({ time: d.time, value: d.bbLower }));
                 
                 bbUpperSeries = chart.addLineSeries({ color: 'rgba(99, 102, 241, 0.5)', lineWidth: 1, priceLineVisible: false, title: 'BB Upper' });
