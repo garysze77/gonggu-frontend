@@ -498,21 +498,38 @@ function tl(t){var b=document.getElementById("b"+(t==="ma5"?"5":t==="ma10"?"10":
             if (e.key === 'Enter') searchStock();
         });
 
-        // Featured Stocks Loader
-        const FEATURED_CODES = ['1091', '1104', '1044', '2319', '2628', '0941', '1398', '3988', '0005', '0011'];
-
+        // Featured Stocks Loader - Stock360 API
         async function loadFeaturedStocks() {
             const grid = document.getElementById('featuredStocksGrid');
             if (!grid) return;
             document.getElementById('featuredStocks').classList.add('active');
             try {
-                const results = await Promise.allSettled(
-                    FEATURED_CODES.map(code => fetch(`https://api.gonggu.app/api/stock/${code}`).then(r => r.json()).then(d => ({ code, ...d })).catch(() => null))
+                // Fetch top 6 industries
+                const indRes = await fetch('https://api.gonggu.app/api/industries');
+                const indData = await indRes.json();
+                const industries = (indData.industries || []).slice(0, 6);
+
+                // Fetch stocks from each industry in parallel
+                const stockPromises = industries.map(ind =>
+                    fetch(`https://api.gonggu.app/api/industry/${ind.code}/stocks`)
+                        .then(r => r.json())
+                        .catch(() => ({ stocks: [] }))
                 );
-                const valid = results.filter(r => r.status === 'fulfilled' && r.value && !r.value.error).map(r => r.value);
-                if (valid.length === 0) { grid.innerHTML = '<div class="featured-error">無法載入精選股票</div>'; return; }
-                grid.innerHTML = valid.map(s => {
-                    const change = parseFloat(s.change || 0);
+
+                const allResults = await Promise.all(stockPromises);
+
+                // Flatten and get top 12 stocks by rise rate
+                const allStocks = allResults.flatMap(r => r.stocks || []);
+                allStocks.sort((a, b) => (b.changeRate || 0) - (a.changeRate || 0));
+                const top12 = allStocks.slice(0, 12);
+
+                if (top12.length === 0) {
+                    grid.innerHTML = '<div class="featured-error">無法載入精選股票</div>';
+                    return;
+                }
+
+                grid.innerHTML = top12.map(s => {
+                    const change = parseFloat(s.changeRate || s.change || 0);
                     const cls = change >= 0 ? 'up' : 'down';
                     const arrow = change >= 0 ? '▲' : '▼';
                     return `<button class="featured-stock-chip" onclick="searchStock('${s.symbol || s.code}')">
@@ -522,6 +539,7 @@ function tl(t){var b=document.getElementById("b"+(t==="ma5"?"5":t==="ma10"?"10":
                     </button>`;
                 }).join('');
             } catch(e) {
+                console.error(e);
                 grid.innerHTML = '<div class="featured-error">載入失敗</div>';
             }
         }
