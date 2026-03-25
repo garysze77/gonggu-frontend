@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🎯 GongGu 港股AI預測系統</title>
+  <meta name="description" content="GongGu - AI-powered Hong Kong stock prediction system">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #0d1117; color: #fff; min-height: 100vh; }
+    header { background: #161b22; padding: 20px; border-bottom: 1px solid #30363d; }
+    .logo { font-size: 1.8rem; font-weight: 800; background: linear-gradient(135deg, #3fb950, #58a6ff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+    .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
+    .stat-card { background: #161b22; border: 1px solid #30363d; border-radius: 12px; padding: 20px; text-align: center; }
+    .stat-value { font-size: 2rem; font-weight: 700; }
+    .stat-value.buy { color: #3fb950; }
+    .stat-value.sell { color: #f85149; }
+    .stat-label { color: #8b949e; font-size: 0.9rem; margin-top: 4px; }
+    .tabs { display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; }
+    .tab { padding: 10px 20px; border-radius: 8px; border: 1px solid #30363d; background: #161b22; color: #8b949e; cursor: pointer; font-size: 0.9rem; }
+    .tab.active { background: #3fb950; color: #000; border-color: #3fb950; }
+    .tab.industry-tab { border-color: #58a6ff; }
+    .tab.industry-tab.active { background: #58a6ff; color: #000; }
+    .tab.back-tab { background: transparent; border-color: #30363d; color: #8b949e; }
+    .stock-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px; }
+    .industry-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 12px; margin-bottom: 24px; }
+    .industry-card { background: #161b22; border: 1px solid #30363d; border-radius: 12px; padding: 16px; cursor: pointer; transition: border-color 0.2s, transform 0.2s; }
+    .industry-card:hover { border-color: #58a6ff; transform: translateY(-2px); }
+    .industry-name { font-size: 1rem; font-weight: 600; margin-bottom: 8px; }
+    .industry-stats { display: flex; flex-wrap: wrap; gap: 6px; }
+    .industry-stat { background: #21262d; padding: 3px 8px; border-radius: 4px; font-size: 0.75rem; color: #8b949e; }
+    .industry-stat.positive { color: #3fb950; }
+    .industry-stat.negative { color: #f85149; }
+    .stock-card { background: #161b22; border: 1px solid #30363d; border-radius: 12px; padding: 16px; }
+    .stock-card.buy { border-left: 4px solid #3fb950; }
+    .stock-card.sell { border-left: 4px solid #f85149; }
+    .stock-card.hold { border-left: 4px solid #8b949e; }
+    .stock-card.screener { border-left: 4px solid #58a6ff; }
+    .stock-symbol { font-size: 1.3rem; font-weight: 700; }
+    .stock-name { color: #8b949e; font-size: 0.85rem; }
+    .stock-signal { padding: 4px 12px; border-radius: 6px; font-weight: 600; font-size: 0.85rem; display: inline-block; margin-top: 8px; }
+    .stock-signal.buy { background: #3fb950; color: #000; }
+    .stock-signal.sell { background: #f85149; color: #fff; }
+    .stock-signal.hold { background: #30363d; color: #8b949e; }
+    .stock-price { font-size: 1.5rem; font-weight: 600; margin: 8px 0; }
+    .indicators { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+    .indicator { background: #21262d; padding: 4px 10px; border-radius: 4px; font-size: 0.75rem; color: #8b949e; }
+    .indicator.ml-pred { color: #fff; font-weight: 600; }
+    .indicator.positive { color: #3fb950; }
+    .indicator.negative { color: #f85149; }
+    .loading { text-align: center; padding: 60px; color: #8b949e; }
+    .section-title { font-size: 1.2rem; font-weight: 600; margin-bottom: 16px; color: #c9d1d9; }
+    .screener-filter { background: #161b22; border: 1px solid #30363d; border-radius: 8px; padding: 12px 16px; margin-bottom: 20px; display: flex; gap: 16px; flex-wrap: wrap; align-items: center; font-size: 0.85rem; color: #8b949e; }
+    .screener-filter span { color: #58a6ff; font-weight: 600; }
+    footer { text-align: center; padding: 40px; color: #8b949e; border-top: 1px solid #30363d; margin-top: 40px; }
+    .hidden { display: none !important; }
+    .market-cap { color: #8b949e; font-size: 0.8rem; margin-top: 4px; }
+    .screener-header { margin-bottom: 16px; }
+    .screener-title { font-size: 1.2rem; font-weight: 600; margin-bottom: 4px; }
+    .screener-subtitle { color: #8b949e; font-size: 0.85rem; }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="logo">🎯 GongGu</div>
+  </header>
+
+  <main class="container">
+    <!-- AI Signals Section -->
+    <section id="aiSection">
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-value" id="totalStocks">-</div>
+          <div class="stat-label">股票數量</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value buy" id="buyCount">-</div>
+          <div class="stat-label">買入信號</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value sell" id="sellCount">-</div>
+          <div class="stat-label">賣出信號</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="holdCount">-</div>
+          <div class="stat-label">觀望</div>
+        </div>
+      </div>
+
+      <div class="tabs">
+        <button class="tab active" data-tab="ai" data-filter="all">全部</button>
+        <button class="tab" data-tab="ai" data-filter="buy">📈 買入</button>
+        <button class="tab" data-tab="ai" data-filter="sell">📉 賣出</button>
+        <button class="tab" data-tab="ai" data-filter="hold">⚪ 觀望</button>
+        <button class="tab industry-tab" data-tab="screener">📊 行業精選</button>
+      </div>
+
+      <div id="stockList">
+        <div class="loading">載入中...</div>
+      </div>
+    </section>
+
+    <!-- Stock Screener Section -->
+    <section id="screenerSection" class="hidden">
+      <div class="screener-header">
+        <div class="screener-title">📊 行業精選</div>
+        <div class="screener-subtitle">市值 HK$10B - 50B | 升幅排序 | 每行業 Top 5</div>
+      </div>
+
+      <div class="screener-filter">
+        <div>篩選條件：</div>
+        <div>市值 <span>HK$10B - 50B</span></div>
+        <div>|</div>
+        <div>排序 <span>升幅 Desc</span></div>
+        <div>|</div>
+        <div>每行業 <span>Top 5</span></div>
+      </div>
+
+      <div id="screenerBackBtn" class="hidden" style="margin-bottom:16px;">
+        <button class="tab back-tab" id="backToIndustriesBtn">← 返回行業列表</button>
+      </div>
+
+      <div id="industryList">
+        <div class="loading">載入行業中...</div>
+      </div>
+
+      <div id="screenerStockList" class="hidden">
+        <div class="loading">載入股票中...</div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <p>🚀 Powered by AI + Machine Learning</p>
+  </footer>
+
+  <script>
+    var API_URL = 'https://api.gonggu.app/api';
+    var allStocks = [];
+    var allIndustries = [];
+    var currentView = 'ai';
+
+    // ==================== AI Signals Tab ====================
+    async function loadData() {
+      try {
+        var stocksRes = await fetch(API_URL + '/stocks');
+        var data = await stocksRes.json();
+        allStocks = data.all_stocks || [];
+        var buyStocks = allStocks.filter(function(s) { return s.signal === 'BUY'; });
+        var sellStocks = allStocks.filter(function(s) { return s.signal === 'SELL'; });
+        var holdStocks = allStocks.filter(function(s) { return s.signal === 'HOLD'; });
+        document.getElementById('totalStocks').textContent = data.total_stocks || 0;
+        document.getElementById('buyCount').textContent = buyStocks.length;
+        document.getElementById('sellCount').textContent = sellStocks.length;
+        document.getElementById('holdCount').textContent = holdStocks.length;
+        renderStocks(allStocks);
+      } catch (error) {
+        console.error('Error:', error);
+        document.getElementById('stockList').innerHTML = '<div class="loading">載入失敗，請稍後再試</div>';
+      }
+    }
+
+    function renderStocks(stocks) {
+      var grid = document.getElementById('stockList');
+      if (stocks.length === 0) { grid.innerHTML = '<div class="loading">暫無數據</div>'; return; }
+      grid.innerHTML = stocks.map(function(stock) {
+        var signalClass = stock.signal === 'BUY' ? 'buy' : (stock.signal === 'SELL' ? 'sell' : 'hold');
+        var change = parseFloat(stock.change) || 0;
+        var changeClass = change >= 0 ? 'positive' : 'negative';
+        var changeSign = change >= 0 ? '+' : '';
+        return '<div class="stock-card ' + signalClass + '">' +
+          '<div class="stock-symbol">' + stock.symbol + '</div>' +
+          '<div class="stock-name">' + stock.name + '</div>' +
+          '<div class="stock-price">$' + stock.close + ' <span class="' + changeClass + '">' + changeSign + stock.change + '%</span></div>' +
+          '<div class="stock-signal ' + signalClass + '">' + stock.signal + '</div>' +
+          '<div class="indicators">' +
+            '<div class="indicator">RSI: ' + (stock.rsi14 || '-') + '</div>' +
+            '<div class="indicator">MACD: ' + (stock.macd || '-') + '</div>' +
+            '<div class="indicator">MA20: $' + (stock.ma20 || '-') + '</div>' +
+            '<div class="indicator">Vol: ' + (stock.volumeRatio || '-') + 'x</div>' +
+          '</div>' +
+        '</div>';
+      }).join('');
+    }
+
+    // ==================== Stock Screener Tab ====================
+    async function loadIndustries() {
+      try {
+        var res = await fetch(API_URL + '/industries');
+        var data = await res.json();
+        allIndustries = data.industries || [];
+        renderIndustries(allIndustries);
+      } catch (error) {
+        console.error('Error loading industries:', error);
+        document.getElementById('industryList').innerHTML = '<div class="loading">載入失敗，請稍後再試</div>';
+      }
+    }
+
+    function renderIndustries(industries) {
+      var container = document.getElementById('industryList');
+      container.innerHTML = '<div class="section-title">選擇行業</div><div class="industry-grid">' +
+        industries.map(function(ind) {
+          var changeVal = parseFloat((ind.changeRate || '0').replace(/[+%]/g, ''));
+          var changeClass = changeVal > 0 ? 'positive' : (changeVal < 0 ? 'negative' : '');
+          return '<div class="industry-card" data-code="' + ind.code + '">' +
+            '<div class="industry-name">' + ind.name + '</div>' +
+            '<div class="industry-stats">' +
+              '<div class="industry-stat ' + changeClass + '">' + ind.changeRate + '</div>' +
+              '<div class="industry-stat">升 ' + ind.riseCount + '/' + ind.totalCount + '</div>' +
+              '<div class="industry-stat">成交 ' + ind.turnover + '</div>' +
+            '</div>' +
+          '</div>';
+        }).join('') + '</div>';
+      // Add click handlers
+      container.querySelectorAll('.industry-card').forEach(function(card) {
+        card.addEventListener('click', function() {
+          var code = this.getAttribute('data-code');
+          var name = this.querySelector('.industry-name').textContent;
+          loadSectorStocks(code, name);
+        });
+      });
+    }
+
+    async function loadSectorStocks(code, name) {
+      document.getElementById('screenerBackBtn').classList.remove('hidden');
+      document.getElementById('industryList').classList.add('hidden');
+      var stockListEl = document.getElementById('screenerStockList');
+      stockListEl.classList.remove('hidden');
+      stockListEl.innerHTML = '<div class="loading">載入 ' + name + ' 股票中...</div>';
+      try {
+        var res = await fetch(API_URL + '/industry/' + code + '/stocks');
+        var data = await res.json();
+        renderScreenerStocks(data.stocks || [], name, data.total_matched || 0);
+      } catch (error) {
+        console.error('Error loading sector stocks:', error);
+        stockListEl.innerHTML = '<div class="loading">載入失敗，請稍後再試</div>';
+      }
+    }
+
+    function renderScreenerStocks(stocks, industryName, total) {
+      var container = document.getElementById('screenerStockList');
+      if (stocks.length === 0) {
+        container.innerHTML = '<div class="section-title">' + industryName + ' <span style="color:#8b949e;font-size:0.9rem">（符合條件: ' + total + ' 隻）</span></div><div class="loading">暫無符合條件的股票</div>';
+        return;
+      }
+      container.innerHTML = '<div class="section-title">' + industryName + ' <span style="color:#8b949e;font-size:0.9rem">（符合條件: ' + total + ' 隻，展示 Top 5）</span></div><div class="stock-grid">' +
+        stocks.map(function(stock) {
+          var change = parseFloat(stock.changeRate) || 0;
+          var changeClass = change >= 0 ? 'positive' : 'negative';
+          var changeSign = change >= 0 ? '+' : '';
+          return '<div class="stock-card screener">' +
+            '<div class="stock-symbol">' + stock.code + '</div>' +
+            '<div class="stock-name">' + stock.name + '</div>' +
+            '<div class="stock-price">$' + stock.price + ' <span class="' + changeClass + '">' + changeSign + stock.changeRate + '%</span></div>' +
+            '<div class="indicators">' +
+              '<div class="indicator ' + changeClass + '">升幅 ' + changeSign + stock.changeRate + '%</div>' +
+              '<div class="indicator">市值 ' + stock.marketCap + '</div>' +
+              '<div class="indicator">P/E ' + stock.peRatio + '</div>' +
+              '<div class="indicator">成交 ' + stock.turnover + '</div>' +
+            '</div>' +
+          '</div>';
+        }).join('') + '</div>';
+    }
+
+    // ==================== Tab Navigation ====================
+    document.querySelectorAll('.tab[data-tab]').forEach(function(tab) {
+      tab.addEventListener('click', function() {
+        var tabName = this.getAttribute('data-tab');
+        document.querySelectorAll('.tab[data-tab]').forEach(function(t) { t.classList.remove('active'); });
+        this.classList.add('active');
+        if (tabName === 'ai') {
+          currentView = 'ai';
+          document.getElementById('aiSection').classList.remove('hidden');
+          document.getElementById('screenerSection').classList.add('hidden');
+        } else if (tabName === 'screener') {
+          currentView = 'screener';
+          document.getElementById('aiSection').classList.add('hidden');
+          document.getElementById('screenerSection').classList.remove('hidden');
+          document.getElementById('screenerBackBtn').classList.add('hidden');
+          document.getElementById('industryList').classList.remove('hidden');
+          document.getElementById('screenerStockList').classList.add('hidden');
+          if (allIndustries.length === 0) loadIndustries();
+        }
+      });
+    });
+
+    document.getElementById('backToIndustriesBtn').addEventListener('click', function() {
+      document.getElementById('screenerBackBtn').classList.add('hidden');
+      document.getElementById('industryList').classList.remove('hidden');
+      document.getElementById('screenerStockList').classList.add('hidden');
+    });
+
+    // AI tab filter clicks
+    document.querySelectorAll('.tab[data-filter]').forEach(function(tab) {
+      tab.addEventListener('click', function() {
+        var filter = this.getAttribute('data-filter');
+        document.querySelectorAll('.tab[data-filter]').forEach(function(t) { t.classList.remove('active'); });
+        this.classList.add('active');
+        if (filter === 'all') renderStocks(allStocks);
+        else renderStocks(allStocks.filter(function(s) { return s.signal === filter.toUpperCase(); }));
+      });
+    });
+
+    // Initial load
+    loadData();
+  </script>
+</body>
+</html>
